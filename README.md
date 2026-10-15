@@ -55,6 +55,10 @@ Dạy tôi TCP/IP hoạt động thế nào
 
 `/md-unlog` stops logging. Tired? Say "giảng luôn, đừng hỏi nhiều" and Claude switches to narrating.
 
+## Desktop app
+
+Prefer a window over terminal + Obsidian? `app/` is a Tauri app that shows lessons, chat with Claude, clickable quiz cards and a record button in one place — see [app/README.md](app/README.md).
+
 ## Notes
 
 - If a subagent fails (no network, no Chrome), the main session still teaches; you only lose fact-checking or generated visuals.
