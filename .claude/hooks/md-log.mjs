@@ -200,7 +200,7 @@ function gradeBlock(input) {
 	const results = Array.isArray(input?.results) ? input.results : []
 	return results.map((r) => {
 		const correct = Array.isArray(r.correct) ? r.correct.join(", ") : String(r.correct ?? "")
-		const body = [`**${r.ok ? "✓ Đúng" : "✗ Chưa đúng"}** — đáp án: ${correct}`]
+		const body = [`${r.ok ? "✓ Đúng" : "✗ Chưa đúng"} — đáp án: **${correct}**`]
 		if (r.explanation) body.push("", ...String(r.explanation).split("\n"))
 		return callout("success", "Đáp án", body).replace("[!success]", "[!success]-")
 	})

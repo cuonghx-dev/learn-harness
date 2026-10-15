@@ -70,6 +70,8 @@ export function ChatPanel({ claude, logControl }: { claude: Claude; logControl: 
     state.busy && !pendingQuiz && !pendingPermission && !toolRunning && !(last?.kind === "text" && last.streaming)
   const resumable = lastSession()
   const locked = !!pendingQuiz
+  // Notices alone (e.g. "started recording") don't end the welcome screen.
+  const empty = state.items.every((it) => it.kind === "notice")
 
   return (
     <div className="flex h-full min-w-0 flex-col bg-chat">
@@ -99,7 +101,7 @@ export function ChatPanel({ claude, logControl }: { claude: Claude; logControl: 
         }}
         className="min-h-0 flex-1 overflow-y-auto"
       >
-        {state.items.length === 0 ? (
+        {empty ? (
           <div className="flex min-h-full flex-col justify-center gap-[22px] px-7 py-8">
             <h2 className="font-serif text-[30px] leading-[1.2] tracking-[-0.01em] text-ink">Hôm nay học gì?</h2>
             <div className="flex flex-col gap-2">
@@ -130,6 +132,9 @@ export function ChatPanel({ claude, logControl }: { claude: Claude; logControl: 
                 <ArrowRight className="size-4 shrink-0 text-muted-2" />
               </button>
             )}
+            {state.items.map((item) => (
+              <Item key={item.id} item={item} activeQuiz={false} onAnswer={() => {}} onSkip={() => {}} onDecide={() => {}} />
+            ))}
           </div>
         ) : (
           <div className="flex min-h-full flex-col justify-end gap-3.5 p-[18px]">
