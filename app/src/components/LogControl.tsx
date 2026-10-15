@@ -1,11 +1,12 @@
 import { useState } from "react"
 import { Circle, LoaderCircle, Square } from "lucide-react"
 
+import { TipButton } from "@/components/TipButton"
 import { Button } from "@/components/ui/button"
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
+import { ScrollArea } from "@/components/ui/scroll-area"
 import type { Note } from "@/lib/ipc"
-import { cn } from "@/lib/utils"
 
 type Props = {
   logFile: string | null
@@ -51,13 +52,13 @@ export function LogControl({ logFile, notes, onStart, onStop }: Props) {
 
   if (logFile) {
     return (
-      <Button
+      <TipButton
         variant="outline"
         size="sm"
         disabled={working}
         onClick={() => run(onStop)}
         className="h-7 gap-1.5 rounded-full border-red-500/40 pr-2.5 pl-2 text-xs"
-        title={`Đang ghi vào ${logFile}`}
+        tip={`Đang ghi vào ${logFile}`}
       >
         {working ? (
           <LoaderCircle className="size-3 animate-spin" />
@@ -69,7 +70,7 @@ export function LogControl({ logFile, notes, onStart, onStop }: Props) {
         )}
         <span className="max-w-36 truncate">{logFile.replace(/^notes\//, "")}</span>
         <Square className="size-3 fill-current opacity-60" />
-      </Button>
+      </TipButton>
     )
   }
 
@@ -100,19 +101,19 @@ export function LogControl({ logFile, notes, onStart, onStop }: Props) {
           {notes.length > 0 && (
             <div className="grid gap-1.5">
               <p className="text-xs font-medium text-muted-foreground">Hoặc ghi tiếp vào bài có sẵn</p>
-              <div className="max-h-48 overflow-y-auto rounded-lg border">
+              <ScrollArea className="rounded-lg border [&>[data-slot=scroll-area-viewport]]:max-h-48">
                 {notes.slice(0, 20).map((n) => (
-                  <button
+                  <Button
                     key={n.path}
-                    type="button"
+                    variant="ghost"
                     disabled={working}
                     onClick={() => start(n.path)}
-                    className={cn("block w-full truncate px-3 py-1.5 text-left text-sm hover:bg-accent", "border-b last:border-b-0")}
+                    className="block h-auto w-full truncate rounded-none border-b px-3 py-1.5 text-left font-normal last:border-b-0"
                   >
                     {n.name}
-                  </button>
+                  </Button>
                 ))}
-              </div>
+              </ScrollArea>
             </div>
           )}
           <DialogFooter>

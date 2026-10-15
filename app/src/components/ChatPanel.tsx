@@ -19,11 +19,13 @@ import {
 import { Markdown } from "@/components/Markdown"
 import { PermissionCard } from "@/components/PermissionCard"
 import { QuizCard } from "@/components/QuizCard"
+import { TipButton } from "@/components/TipButton"
+import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
+import { Card } from "@/components/ui/card"
 import { Textarea } from "@/components/ui/textarea"
 import { toolSummary, type ChatItem, type QuizPick } from "@/lib/chat"
 import type { useClaude } from "@/lib/useClaude"
-import { cn } from "@/lib/utils"
 
 type Claude = ReturnType<typeof useClaude>
 
@@ -85,16 +87,9 @@ export function ChatPanel({ claude, header }: { claude: Claude; header: ReactNod
       <div data-tauri-drag-region className="flex h-11 shrink-0 items-center gap-2 border-b px-3">
         {header}
         <div className="ml-auto flex items-center gap-1">
-          <Button
-            variant="ghost"
-            size="icon"
-            className="size-7"
-            title="Session mới"
-            disabled={state.busy}
-            onClick={() => newSession()}
-          >
+          <TipButton variant="ghost" size="icon" className="size-7" tip="Session mới" disabled={state.busy} onClick={() => newSession()}>
             <Plus />
-          </Button>
+          </TipButton>
         </div>
       </div>
 
@@ -117,14 +112,14 @@ export function ChatPanel({ claude, header }: { claude: Claude; header: ReactNod
             </div>
             <div className="grid w-full max-w-xs gap-2">
               {SUGGESTIONS.map((s) => (
-                <button
+                <Button
                   key={s}
-                  type="button"
+                  variant="outline"
                   onClick={() => setDraft(s)}
-                  className="rounded-lg border px-3 py-2 text-left text-sm transition-colors hover:bg-accent"
+                  className="h-auto justify-start px-3 py-2 text-left font-normal whitespace-normal"
                 >
                   {s}
-                </button>
+                </Button>
               ))}
               {resumable && (
                 <Button variant="ghost" size="sm" className="text-muted-foreground" onClick={() => newSession(resumable)}>
@@ -164,7 +159,7 @@ export function ChatPanel({ claude, header }: { claude: Claude; header: ReactNod
       </div>
 
       <div className="shrink-0 p-3 pt-0">
-        <div className="rounded-2xl border bg-card shadow-sm focus-within:border-primary/50 focus-within:ring-4 focus-within:ring-primary/10">
+        <Card className="gap-0 rounded-2xl py-0 focus-within:border-primary/50 focus-within:ring-4 focus-within:ring-primary/10">
           <Textarea
             ref={input}
             rows={1}
@@ -184,16 +179,16 @@ export function ChatPanel({ claude, header }: { claude: Claude; header: ReactNod
               {state.model ? state.model.replace(/^claude-/, "") : "Enter để gửi · Shift+Enter xuống dòng"}
             </span>
             {state.busy ? (
-              <Button size="icon" variant="secondary" className="size-7 rounded-full" title="Dừng" onClick={interrupt}>
+              <TipButton size="icon" variant="secondary" className="size-7 rounded-full" tip="Dừng" onClick={interrupt}>
                 <Square className="size-3 fill-current" />
-              </Button>
+              </TipButton>
             ) : (
               <Button size="icon" className="size-7 rounded-full" disabled={!draft.trim()} onClick={() => submit()}>
                 <ArrowUp />
               </Button>
             )}
           </div>
-        </div>
+        </Card>
       </div>
     </div>
   )
@@ -233,15 +228,12 @@ function Item({
     case "permission":
       return <PermissionCard perm={item} onDecide={onDecide} />
     case "notice":
-      return (
-        <div
-          className={cn(
-            "rounded-lg px-3 py-2 text-xs",
-            item.tone === "error" ? "bg-destructive/10 text-destructive" : "text-center text-muted-foreground",
-          )}
-        >
-          {item.text}
-        </div>
+      return item.tone === "error" ? (
+        <Alert variant="destructive" className="px-3 py-2">
+          <AlertDescription className="text-xs">{item.text}</AlertDescription>
+        </Alert>
+      ) : (
+        <div className="px-3 py-2 text-center text-xs text-muted-foreground">{item.text}</div>
       )
     case "turn":
       return null

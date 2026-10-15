@@ -5,7 +5,7 @@ import { ChatPanel } from "@/components/ChatPanel"
 import { LogControl } from "@/components/LogControl"
 import { NotesSidebar } from "@/components/NotesSidebar"
 import { NoteViewer } from "@/components/NoteViewer"
-import { Button } from "@/components/ui/button"
+import { TipButton } from "@/components/TipButton"
 import { api, on, type Note } from "@/lib/ipc"
 import { project } from "@/lib/project"
 import { useClaude } from "@/lib/useClaude"
@@ -144,13 +144,13 @@ export default function App() {
 
   const toolbar = (
     <div className={cn("flex shrink-0 items-center gap-0.5", !sidebarOpen && "pl-[68px]")}>
-      <Button variant="ghost" size="icon" className="size-7 text-muted-foreground" title="Danh sách bài (⌘B)" onClick={() => setSidebarOpen((v) => !v)}>
+      <TipButton variant="ghost" size="icon" className="size-7 text-muted-foreground" tip="Danh sách bài (⌘B)" onClick={() => setSidebarOpen((v) => !v)}>
         <PanelLeft />
-      </Button>
+      </TipButton>
       {!chatOpen && (
-        <Button variant="ghost" size="icon" className="size-7 text-muted-foreground" title="Trò chuyện (⌘J)" onClick={() => setChatOpen(true)}>
+        <TipButton variant="ghost" size="icon" className="size-7 text-muted-foreground" tip="Trò chuyện (⌘J)" onClick={() => setChatOpen(true)}>
           <PanelRight />
-        </Button>
+        </TipButton>
       )}
     </div>
   )
@@ -172,9 +172,9 @@ export default function App() {
             claude={claude}
             header={
               <>
-                <Button variant="ghost" size="icon" className="size-7 text-muted-foreground" title="Ẩn (⌘J)" onClick={() => setChatOpen(false)}>
+                <TipButton variant="ghost" size="icon" className="size-7 text-muted-foreground" tip="Ẩn (⌘J)" onClick={() => setChatOpen(false)}>
                   <PanelRight />
-                </Button>
+                </TipButton>
                 <LogControl logFile={logFile} notes={notes} onStart={startLog} onStop={stopLog} />
               </>
             }

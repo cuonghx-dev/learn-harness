@@ -2,6 +2,7 @@ import { useLayoutEffect, useRef, type ReactNode } from "react"
 import { BookOpen } from "lucide-react"
 
 import { Markdown } from "@/components/Markdown"
+import { Badge } from "@/components/ui/badge"
 
 type Props = {
   path: string | null
@@ -41,10 +42,10 @@ export function NoteViewer({ path, content, live, toolbar, onOpenNote }: Props) 
           <div data-tauri-drag-region className="flex min-w-0 items-center gap-2 text-sm">
             <span className="truncate font-medium">{name}</span>
             {live && (
-              <span className="flex shrink-0 items-center gap-1 rounded-full bg-red-500/10 px-2 py-0.5 text-[10px] font-semibold tracking-wide text-red-600 uppercase dark:text-red-400">
+              <Badge variant="secondary" className="rounded-full bg-red-500/10 text-[10px] tracking-wide text-red-600 uppercase dark:text-red-400">
                 <span className="size-1.5 animate-pulse rounded-full bg-red-500" />
                 Đang ghi
-              </span>
+              </Badge>
             )}
           </div>
         )}

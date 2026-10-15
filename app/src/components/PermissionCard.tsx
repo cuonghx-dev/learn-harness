@@ -1,6 +1,7 @@
 import { ShieldAlert } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
+import { Card } from "@/components/ui/card"
 import { toolSummary, type ChatItem } from "@/lib/chat"
 import { cn } from "@/lib/utils"
 
@@ -14,9 +15,9 @@ export function PermissionCard({ perm, onDecide }: { perm: Permission; onDecide:
   const pending = !perm.decision
 
   return (
-    <div
+    <Card
       className={cn(
-        "rounded-xl border bg-card text-sm shadow-sm",
+        "gap-0 py-0 text-sm",
         pending && "border-amber-500/50 ring-4 ring-amber-500/10",
       )}
     >
@@ -45,6 +46,6 @@ export function PermissionCard({ perm, onDecide }: { perm: Permission; onDecide:
       ) : (
         <div className="px-3.5 py-2.5 text-xs text-muted-foreground">{DECIDED[perm.decision!]}</div>
       )}
-    </div>
+    </Card>
   )
 }

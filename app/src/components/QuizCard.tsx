@@ -2,7 +2,9 @@ import { useEffect, useMemo, useState } from "react"
 import { Check, CircleHelp, SkipForward } from "lucide-react"
 
 import { Markdown } from "@/components/Markdown"
+import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
+import { Card } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import type { ChatItem, QuizPick, QuizQuestion } from "@/lib/chat"
 import { cn } from "@/lib/utils"
@@ -65,9 +67,9 @@ export function QuizCard({ quiz, active, onAnswer, onSkip }: Props) {
   })
 
   return (
-    <div
+    <Card
       className={cn(
-        "rounded-xl border bg-card shadow-sm transition-opacity",
+        "gap-0 py-0 transition-opacity",
         !done && "border-[color-mix(in_oklch,var(--callout-question)_55%,transparent)] ring-4 ring-[color-mix(in_oklch,var(--callout-question)_12%,transparent)]",
       )}
     >
@@ -85,31 +87,30 @@ export function QuizCard({ quiz, active, onAnswer, onSkip }: Props) {
               {q.options.map((o, oi) => {
                 const picked = shown.labels.includes(o.label)
                 return (
-                  <button
+                  <Button
                     key={oi}
-                    type="button"
+                    variant="outline"
                     disabled={done}
+                    aria-pressed={picked}
                     onClick={() => toggle(qi, o.label)}
                     className={cn(
-                      "group flex items-start gap-3 rounded-lg border px-3 py-2.5 text-left text-sm transition-colors",
-                      "enabled:hover:border-primary/60 enabled:hover:bg-accent disabled:cursor-default",
-                      picked && "border-primary bg-primary/8",
-                      done && !picked && "opacity-50",
+                      "h-auto items-start justify-start gap-3 px-3 py-2.5 text-left font-normal whitespace-normal",
+                      "hover:border-primary/60 disabled:opacity-100",
+                      picked && "border-primary bg-primary/8 dark:border-primary dark:bg-primary/8",
+                      done && !picked && "disabled:opacity-50",
                     )}
                   >
-                    <span
-                      className={cn(
-                        "mt-px flex size-5 shrink-0 items-center justify-center rounded-md border text-[11px] font-semibold text-muted-foreground",
-                        picked && "border-primary bg-primary text-primary-foreground",
-                      )}
+                    <Badge
+                      variant={picked ? "default" : "outline"}
+                      className={cn("mt-px size-5 rounded-md p-0 text-[11px]", !picked && "text-muted-foreground")}
                     >
                       {picked ? <Check className="size-3" /> : oi + 1}
-                    </span>
+                    </Badge>
                     <span className="min-w-0">
                       <span className="block font-medium">{o.label}</span>
                       {o.description && <span className="mt-0.5 block text-xs text-muted-foreground">{o.description}</span>}
                     </span>
-                  </button>
+                  </Button>
                 )
               })}
               {!done && (
@@ -145,6 +146,6 @@ export function QuizCard({ quiz, active, onAnswer, onSkip }: Props) {
       ) : (
         quiz.skipped && <div className="px-4 py-2 text-xs text-muted-foreground">Đã bỏ qua</div>
       )}
-    </div>
+    </Card>
   )
 }
