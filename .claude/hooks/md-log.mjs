@@ -331,7 +331,9 @@ function flush(state) {
 // --- Commands ---
 
 function link(arg, state) {
-	const filepath = (arg ?? "").trim()
+	// Only the first line is the path: a prompt typed after it in the same
+	// message lands in $ARGUMENTS too and must not become part of the filename.
+	const filepath = (arg ?? "").split("\n")[0].trim()
 	if (!filepath) return "Usage: /md-log <filepath>"
 	if (!state.transcript) return "Chưa biết transcript của session — gửi một tin nhắn bất kỳ rồi chạy lại /md-log."
 	const resolved = isAbsolute(filepath) ? filepath : resolve(PROJECT_DIR, filepath)
