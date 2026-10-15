@@ -4,13 +4,20 @@
 // complete `assistant` message, which replaces the streamed draft. Subagent
 // traffic (`parent_tool_use_id` set) is folded into its parent Agent tool card.
 import type { ClaudeMessage } from "@/lib/ipc"
+import { fold } from "@/lib/text"
 
 export const QUIZ_TOOL = "AskUserQuestion"
+/** Served by the app's own MCP server (`src-tauri/resources/learn-mcp.mjs`). */
+export const GRADE_TOOL = "mcp__learn__grade_quiz"
+/** Always offered as the last quiz option; a valid answer, graded as wrong. */
+export const DONT_KNOW = "Tôi không biết"
 
 export type QuizOption = { label: string; description?: string }
 export type QuizQuestion = { question: string; header?: string; options: QuizOption[]; multiSelect?: boolean }
 /** What the learner picked for one question: option labels plus free text. */
 export type QuizPick = { labels: string[]; other: string }
+/** Claude's verdict on one question, from `grade_quiz`. */
+export type QuizGrade = { question: string; correct: string[]; explanation?: string; ok: boolean }
 
 export type ChatItem =
   | { kind: "user"; id: string; text: string }
@@ -33,6 +40,7 @@ export type ChatItem =
       /** Per question, what was picked; kept so labels containing ", " still display right. */
       picks?: QuizPick[]
       skipped?: boolean
+      grade?: QuizGrade[]
     }
   | {
       kind: "permission"
@@ -102,6 +110,29 @@ export function toolSummary(name: string, input: ClaudeMessage): string {
   }
 }
 
+type GradeInput = { question?: string; correct?: string[] | string; ok?: boolean; explanation?: string }
+
+/** Put Claude's grading on the newest answered quiz that has none yet. */
+function attachGrade(items: ChatItem[], results: GradeInput[] | undefined): ChatItem[] {
+  if (!Array.isArray(results)) return items
+  const quiz = [...items].reverse().find((it) => it.kind === "quiz" && it.answers && !it.grade)
+  if (quiz?.kind !== "quiz") return items
+  const same = (a: string, b: string) => fold(a).trim() === fold(b).trim()
+  const grade = quiz.input.questions.map((q, i): QuizGrade => {
+    const r = results.find((r) => r.question && same(r.question, q.question)) ?? results[i] ?? {}
+    const correct = (Array.isArray(r.correct) ? r.correct : r.correct ? [r.correct] : []).map(String)
+    const pick = quiz.picks?.[i] ?? { labels: [], other: "" }
+    const given = [...pick.labels, ...(pick.other.trim() ? [pick.other.trim()] : [])]
+    // Claude's verdict wins (it can judge free text); otherwise compare labels.
+    const ok =
+      typeof r.ok === "boolean"
+        ? r.ok
+        : correct.length > 0 && given.length === correct.length && correct.every((c) => given.some((g) => same(g, c)))
+    return { question: q.question, correct, explanation: r.explanation, ok }
+  })
+  return update(items, quiz.id, (it) => ({ ...it, grade }))
+}
+
 function onMessage(state: ChatState, msg: ClaudeMessage): ChatState {
   const parent: string | null = msg.parent_tool_use_id ?? null
 
@@ -148,6 +179,8 @@ function onMessage(state: ChatState, msg: ClaudeMessage): ChatState {
           items = draft
             ? update(items, draft.id, (it) => ({ ...it, text: c.text, streaming: false }))
             : [...items, { kind: "text", id: uid("t"), msgId, text: c.text, streaming: false }]
+        } else if (c.type === "tool_use" && c.name === GRADE_TOOL) {
+          items = attachGrade(items, c.input?.results)
         } else if (c.type === "tool_use" && c.name !== QUIZ_TOOL) {
           items = [...items, { kind: "tool", id: c.id, name: c.name, input: c.input ?? {}, status: "running", steps: 0 }]
         }

@@ -13,9 +13,9 @@
     "windows": [
       {
         "title": "Learn",
-        "width": 1440,
-        "height": 900,
-        "minWidth": 900,
+        "width": 1280,
+        "height": 800,
+        "minWidth": 960,
         "minHeight": 600,
         "titleBarStyle": "Overlay",
         "hiddenTitle": true

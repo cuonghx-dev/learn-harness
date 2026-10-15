@@ -12,6 +12,10 @@
 //! marked "always allow" are answered here without asking again. The UI answers
 //! with `claude_respond`.
 //!
+//! The session also gets the app's own MCP server (`resources/learn-mcp.mjs`)
+//! with a `grade_quiz` tool: Claude reports quiz grading through it as
+//! structured input, which the UI renders as a graded quiz card.
+//!
 //! One session at a time. Each spawn gets a generation number so events from a
 //! process that was just replaced can be told apart by the UI.
 
@@ -32,6 +36,12 @@ use tokio::sync::{oneshot, watch, Mutex};
 use crate::Project;
 
 const QUIZ_TOOL: &str = "AskUserQuestion";
+/// Served by our own MCP server; always allowed, the UI reads its input.
+const GRADE_TOOL: &str = "mcp__learn__grade_quiz";
+const LEARN_MCP: &str = include_str!("../resources/learn-mcp.mjs");
+const SYSTEM_PROMPT: &str = "Bạn đang chạy trong app desktop Learn. Sau khi người học trả lời một quiz AskUserQuestion, \
+gọi ngay mcp__learn__grade_quiz với đáp án đúng, đúng/sai và giải thích ngắn cho từng câu, rồi mới giảng tiếp. \
+\"Tôi không biết\" là câu trả lời hợp lệ (tính là sai): giảng lại phần đó, đừng trách.";
 const READY_TIMEOUT: Duration = Duration::from_secs(20);
 const LOGIN_PATH_TIMEOUT: Duration = Duration::from_secs(3);
 
@@ -76,6 +86,11 @@ impl Claude {
             old.kill();
         }
 
+        let mcp_script = write_mcp_script(app)?;
+        let mcp_config = json!({
+            "mcpServers": { "learn": { "command": "node", "args": [mcp_script] } },
+        });
+
         let mut cmd = Command::new("claude");
         cmd.args([
             "-p",
@@ -89,7 +104,10 @@ impl Claude {
             "stdio",
             "--permission-mode",
             "default",
+            "--append-system-prompt",
+            SYSTEM_PROMPT,
         ]);
+        cmd.arg("--mcp-config").arg(mcp_config.to_string());
         if let Some(id) = &resume {
             cmd.args(["--resume", id]);
         }
@@ -153,7 +171,7 @@ impl Claude {
                 if ty == "control_request"
                     && msg["request"]["subtype"] == "can_use_tool"
                     && tool != QUIZ_TOOL
-                    && allowed_out.lock().is_ok_and(|a| a.contains(tool))
+                    && (tool == GRADE_TOOL || allowed_out.lock().is_ok_and(|a| a.contains(tool)))
                 {
                     let reply = json!({
                         "type": "control_response",
@@ -224,6 +242,17 @@ impl Claude {
             *slot = None;
         }
     }
+}
+
+/// Write the bundled MCP server where `node` can run it; returns its path.
+fn write_mcp_script(app: &AppHandle) -> Result<String, String> {
+    let dir = app.path().app_cache_dir().map_err(|e| format!("cache dir: {e}"))?;
+    std::fs::create_dir_all(&dir).map_err(|e| format!("{}: {e}", dir.display()))?;
+    let path = dir.join("learn-mcp.mjs");
+    if std::fs::read_to_string(&path).ok().as_deref() != Some(LEARN_MCP) {
+        std::fs::write(&path, LEARN_MCP).map_err(|e| format!("{}: {e}", path.display()))?;
+    }
+    Ok(path.to_string_lossy().into_owned())
 }
 
 /// Start a session (replacing the current one), optionally resuming `resume`.

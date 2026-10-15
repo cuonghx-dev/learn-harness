@@ -1,49 +1,34 @@
 import { useEffect, useLayoutEffect, useRef, useState, type ReactNode } from "react"
-import {
-  ArrowUp,
-  Bot,
-  Check,
-  FileText,
-  Globe,
-  History,
-  LoaderCircle,
-  Plus,
-  Search,
-  Sparkles,
-  Square,
-  SquareTerminal,
-  Wrench,
-  X,
-} from "lucide-react"
+import { ArrowRight, ArrowUp, Check, ChevronDown, Plus, RotateCcw, X } from "lucide-react"
 
 import { Markdown } from "@/components/Markdown"
 import { PermissionCard } from "@/components/PermissionCard"
 import { QuizCard } from "@/components/QuizCard"
-import { TipButton } from "@/components/TipButton"
 import { Alert, AlertDescription } from "@/components/ui/alert"
-import { Button } from "@/components/ui/button"
-import { Card } from "@/components/ui/card"
-import { Textarea } from "@/components/ui/textarea"
 import { toolSummary, type ChatItem, type QuizPick } from "@/lib/chat"
+import { ago } from "@/lib/text"
 import type { useClaude } from "@/lib/useClaude"
+import { cn } from "@/lib/utils"
 
 type Claude = ReturnType<typeof useClaude>
+type Tool = Extract<ChatItem, { kind: "tool" }>
+/** Consecutive tool calls render as one activity row. */
+type Row = { kind: "tools"; id: string; tools: Tool[] } | { kind: "item"; item: ChatItem }
 
-const TOOL_ICONS: Record<string, typeof Wrench> = {
-  Bash: SquareTerminal,
-  Read: FileText,
-  Write: FileText,
-  Edit: FileText,
-  Agent: Bot,
-  Task: Bot,
-  WebSearch: Search,
-  WebFetch: Globe,
-  Skill: Sparkles,
+const SUGGESTIONS = ["Dạy tôi TCP/IP hoạt động thế nào", "Giải thích quy hoạch động bằng ví dụ", "Ôn lại Đại số tuyến tính bằng quiz"]
+
+function rows(items: ChatItem[]): Row[] {
+  const out: Row[] = []
+  for (const item of items) {
+    const prev = out[out.length - 1]
+    if (item.kind === "tool" && prev?.kind === "tools") prev.tools.push(item)
+    else if (item.kind === "tool") out.push({ kind: "tools", id: item.id, tools: [item] })
+    else if (item.kind !== "turn") out.push({ kind: "item", item })
+  }
+  return out
 }
 
-const SUGGESTIONS = ["Dạy tôi TCP/IP hoạt động thế nào", "Giải thích đạo hàm từ con số 0", "Giảng luôn, đừng hỏi nhiều"]
-
-export function ChatPanel({ claude, header }: { claude: Claude; header: ReactNode }) {
+export function ChatPanel({ claude, logControl }: { claude: Claude; logControl: ReactNode }) {
   const { state, send, answer, skip, decide, interrupt, newSession, lastSession } = claude
   const [draft, setDraft] = useState("")
   const scroller = useRef<HTMLDivElement>(null)
@@ -64,32 +49,45 @@ export function ChatPanel({ claude, header }: { claude: Claude; header: ReactNod
     el.style.height = `${Math.min(el.scrollHeight, 220)}px`
   }, [draft])
 
+  const pendingQuiz = [...state.items].reverse().find((it) => it.kind === "quiz" && !it.answers && !it.skipped)
+
   useEffect(() => {
-    if (!state.busy) input.current?.focus()
-  }, [state.busy])
+    if (!state.busy && !pendingQuiz) input.current?.focus()
+  }, [state.busy, pendingQuiz])
 
   const submit = (text = draft) => {
     const t = text.trim()
-    if (!t || state.busy) return
+    if (!t || state.busy || pendingQuiz) return
     stick.current = true
     send(t)
-    setDraft("")
+    if (text === draft) setDraft("")
   }
 
-  const pendingQuiz = [...state.items].reverse().find((it) => it.kind === "quiz" && !it.answers && !it.skipped)
   const last = state.items[state.items.length - 1]
   const pendingPermission = state.items.some((it) => it.kind === "permission" && !it.decision)
-  const thinking = state.busy && !pendingQuiz && !pendingPermission && !(last?.kind === "text" && last.streaming)
+  const toolRunning = state.items.some((it) => it.kind === "tool" && it.status === "running")
+  const thinking =
+    state.busy && !pendingQuiz && !pendingPermission && !toolRunning && !(last?.kind === "text" && last.streaming)
   const resumable = lastSession()
+  const locked = !!pendingQuiz
 
   return (
-    <div className="flex h-full min-w-0 flex-col bg-background">
-      <div data-tauri-drag-region className="flex h-11 shrink-0 items-center gap-2 border-b px-3">
-        {header}
-        <div className="ml-auto flex items-center gap-1">
-          <TipButton variant="ghost" size="icon" className="size-7" tip="Session mới" disabled={state.busy} onClick={() => newSession()}>
-            <Plus />
-          </TipButton>
+    <div className="flex h-full min-w-0 flex-col bg-chat">
+      <div data-tauri-drag-region className="flex h-[50px] shrink-0 items-center gap-2 border-b border-divider px-3.5">
+        <span data-tauri-drag-region className="text-[13px] font-semibold">
+          Trò chuyện
+        </span>
+        <div className="ml-auto flex min-w-0 items-center gap-2">
+          {logControl}
+          <button
+            title="Session mới"
+            aria-label="Session mới"
+            disabled={state.busy}
+            onClick={() => newSession()}
+            className="flex size-7 shrink-0 items-center justify-center rounded-[7px] text-muted-1 hover:bg-tint disabled:opacity-40"
+          >
+            <Plus className="size-4" />
+          </button>
         </div>
       </div>
 
@@ -97,74 +95,82 @@ export function ChatPanel({ claude, header }: { claude: Claude; header: ReactNod
         ref={scroller}
         onScroll={(e) => {
           const el = e.currentTarget
-          stick.current = el.scrollHeight - el.scrollTop - el.clientHeight < 80
+          stick.current = el.scrollHeight - el.scrollTop - el.clientHeight < 40
         }}
         className="min-h-0 flex-1 overflow-y-auto"
       >
         {state.items.length === 0 ? (
-          <div className="flex h-full flex-col items-center justify-center gap-6 px-8 text-center">
-            <div>
-              <div className="mx-auto mb-3 flex size-11 items-center justify-center rounded-2xl bg-primary/12 text-primary">
-                <Sparkles className="size-5" />
-              </div>
-              <h2 className="text-base font-semibold">Hôm nay học gì?</h2>
-              <p className="mt-1 text-sm text-muted-foreground">Bấm “Ghi log” để lưu bài giảng ra file và đọc ở giữa.</p>
-            </div>
-            <div className="grid w-full max-w-xs gap-2">
+          <div className="flex min-h-full flex-col justify-center gap-[22px] px-7 py-8">
+            <h2 className="font-serif text-[30px] leading-[1.2] tracking-[-0.01em] text-ink">Hôm nay học gì?</h2>
+            <div className="flex flex-col gap-2">
               {SUGGESTIONS.map((s) => (
-                <Button
+                <button
                   key={s}
-                  variant="outline"
-                  onClick={() => setDraft(s)}
-                  className="h-auto justify-start px-3 py-2 text-left font-normal whitespace-normal"
+                  onClick={() => submit(s)}
+                  className="rounded-[9px] border border-border bg-white px-3.5 py-[11px] text-left text-[13px] text-ink-2 hover:border-[#c9bfae]"
                 >
                   {s}
-                </Button>
+                </button>
               ))}
-              {resumable && (
-                <Button variant="ghost" size="sm" className="text-muted-foreground" onClick={() => newSession(resumable)}>
-                  <History /> Nối lại session trước
-                </Button>
-              )}
             </div>
+            {resumable && (
+              <button
+                onClick={() => newSession(resumable.id)}
+                className="flex items-center gap-3 rounded-[9px] bg-tint px-3.5 py-3 text-left hover:bg-[#ece6da]"
+              >
+                <RotateCcw className="size-4 shrink-0 text-primary" />
+                <span className="min-w-0 flex-1">
+                  <span className="block text-[13px] font-semibold text-ink">Nối lại session trước</span>
+                  {(resumable.title || resumable.at) && (
+                    <span className="block truncate text-[11.5px] text-muted-2">
+                      {[resumable.title, resumable.at && ago(resumable.at)].filter(Boolean).join(" · ")}
+                    </span>
+                  )}
+                </span>
+                <ArrowRight className="size-4 shrink-0 text-muted-2" />
+              </button>
+            )}
           </div>
         ) : (
-          <div className="flex flex-col gap-3 px-4 py-4">
-            {state.items.map((item) => (
-              <Item
-                key={item.id}
-                item={item}
-                activeQuiz={item === pendingQuiz}
-                onAnswer={(a, p) => item.kind === "quiz" && answer(item, a, p)}
-                onSkip={() => item.kind === "quiz" && skip(item)}
-                onDecide={(d) => item.kind === "permission" && decide(item, d)}
-              />
-            ))}
+          <div className="flex min-h-full flex-col justify-end gap-3.5 p-[18px]">
+            {rows(state.items).map((row) =>
+              row.kind === "tools" ? (
+                <ToolGroup key={row.id} tools={row.tools} />
+              ) : (
+                <Item
+                  key={row.item.id}
+                  item={row.item}
+                  activeQuiz={row.item === pendingQuiz}
+                  onAnswer={(a, p) => row.item.kind === "quiz" && answer(row.item, a, p)}
+                  onSkip={() => row.item.kind === "quiz" && skip(row.item)}
+                  onDecide={(d) => row.item.kind === "permission" && decide(row.item, d)}
+                />
+              ),
+            )}
             {thinking && (
-              <div className="flex items-center gap-2 py-1 text-sm text-muted-foreground">
-                <span className="flex gap-1">
-                  {[0, 1, 2].map((i) => (
-                    <span
-                      key={i}
-                      className="size-1.5 animate-bounce rounded-full bg-primary/70"
-                      style={{ animationDelay: `${i * 120}ms` }}
-                    />
-                  ))}
-                </span>
-                Claude đang nghĩ…
+              <div className="flex items-center gap-1 py-1" aria-label="Claude đang nghĩ">
+                {[0, 1, 2].map((i) => (
+                  <span key={i} className="size-1.5 animate-bounce rounded-full bg-primary/70" style={{ animationDelay: `${i * 120}ms` }} />
+                ))}
               </div>
             )}
           </div>
         )}
       </div>
 
-      <div className="shrink-0 p-3 pt-0">
-        <Card className="gap-0 rounded-2xl py-0 focus-within:border-primary/50 focus-within:ring-4 focus-within:ring-primary/10">
-          <Textarea
+      <div className="shrink-0 px-3.5 pt-3 pb-3.5">
+        <div
+          className={cn(
+            "rounded-xl border px-3 pt-3 pb-2",
+            locked ? "border-border bg-[#f7f4ee]" : "border-input bg-white focus-within:border-[#c9bfae]",
+          )}
+        >
+          <textarea
             ref={input}
             rows={1}
             value={draft}
-            placeholder={pendingQuiz ? "Trả lời câu hỏi ở trên trước nhé…" : "Hỏi Claude…"}
+            disabled={locked}
+            placeholder={locked ? "Trả lời quiz ở trên trước nhé ↑" : "Hỏi Claude…"}
             onChange={(e) => setDraft(e.target.value)}
             onKeyDown={(e) => {
               if (e.key === "Enter" && !e.shiftKey && !e.nativeEvent.isComposing) {
@@ -172,23 +178,35 @@ export function ChatPanel({ claude, header }: { claude: Claude; header: ReactNod
                 submit()
               }
             }}
-            className="max-h-56 min-h-0 resize-none border-0 bg-transparent px-3.5 pt-3 shadow-none focus-visible:ring-0 dark:bg-transparent"
+            className={cn(
+              "block max-h-56 min-h-9 w-full resize-none bg-transparent text-[13.5px] leading-normal text-ink outline-none",
+              locked ? "placeholder:text-primary" : "placeholder:text-placeholder",
+            )}
           />
-          <div className="flex items-center justify-between px-2.5 pb-2">
-            <span className="truncate pl-1 text-[11px] text-muted-foreground">
-              {state.model ? state.model.replace(/^claude-/, "") : "Enter để gửi · Shift+Enter xuống dòng"}
-            </span>
+          <div className="mt-1 flex items-center gap-2">
+            <span className="min-w-0 truncate font-mono text-[11px] text-placeholder">{state.model ?? "claude"}</span>
+            <span className="ml-auto truncate text-[11px] text-[#a9a397]">Enter gửi · ⇧Enter xuống dòng</span>
             {state.busy ? (
-              <TipButton size="icon" variant="secondary" className="size-7 rounded-full" tip="Dừng" onClick={interrupt}>
-                <Square className="size-3 fill-current" />
-              </TipButton>
+              <button
+                title="Dừng"
+                aria-label="Dừng"
+                onClick={interrupt}
+                className="flex size-7 shrink-0 items-center justify-center rounded-lg bg-ink hover:bg-ink/90"
+              >
+                <span className="size-[9px] rounded-[1.5px] bg-white" />
+              </button>
             ) : (
-              <Button size="icon" className="size-7 rounded-full" disabled={!draft.trim()} onClick={() => submit()}>
-                <ArrowUp />
-              </Button>
+              <button
+                aria-label="Gửi"
+                disabled={!draft.trim() || locked}
+                onClick={() => submit()}
+                className="flex size-7 shrink-0 items-center justify-center rounded-lg bg-ink text-white disabled:bg-[#e7e2d8] disabled:text-white"
+              >
+                <ArrowUp className="size-4" />
+              </button>
             )}
           </div>
-        </Card>
+        </div>
       </div>
     </div>
   )
@@ -210,19 +228,17 @@ function Item({
   switch (item.kind) {
     case "user":
       return (
-        <div className="ml-10 self-end rounded-2xl rounded-br-md bg-primary/12 px-3.5 py-2 text-sm whitespace-pre-wrap select-text">
+        <div className="max-w-[80%] self-end rounded-[13px_13px_4px_13px] bg-bubble px-[13px] py-[9px] text-[14px] leading-[1.6] whitespace-pre-wrap text-ink select-text">
           {item.text}
         </div>
       )
     case "text":
       return (
-        <div className="relative">
-          <Markdown text={item.text} className="prose-sm" />
+        <div>
+          <Markdown text={item.text} className="chat" />
           {item.streaming && <span className="ml-0.5 inline-block h-4 w-1.5 animate-pulse rounded-sm bg-primary align-text-bottom" />}
         </div>
       )
-    case "tool":
-      return <ToolRow item={item} />
     case "quiz":
       return <QuizCard quiz={item} active={activeQuiz} onAnswer={onAnswer} onSkip={onSkip} />
     case "permission":
@@ -233,30 +249,56 @@ function Item({
           <AlertDescription className="text-xs">{item.text}</AlertDescription>
         </Alert>
       ) : (
-        <div className="px-3 py-2 text-center text-xs text-muted-foreground">{item.text}</div>
+        <div className="text-center text-[12px] text-muted-3">{item.text}</div>
       )
-    case "turn":
+    default:
       return null
   }
 }
 
-function ToolRow({ item }: { item: Extract<ChatItem, { kind: "tool" }> }) {
-  const Icon = TOOL_ICONS[item.name] ?? Wrench
-  const summary = toolSummary(item.name, item.input)
+function describe(tool: Tool) {
+  const summary = toolSummary(tool.name, tool.input)
+  return summary ? `${tool.name} · ${summary}` : tool.name
+}
+
+function ToolGroup({ tools }: { tools: Tool[] }) {
+  const [open, setOpen] = useState(false)
+  const running = tools.filter((t) => t.status === "running")
+  const current = running[running.length - 1] ?? tools[tools.length - 1]
+  const failed = running.length === 0 && tools.some((t) => t.status === "error")
+  const steps = tools.reduce((n, t) => n + 1 + t.steps, 0)
+  const detail = current.status === "running" && current.lastStep ? current.lastStep : describe(current)
+
   return (
-    <div className="flex min-w-0 items-center gap-2 rounded-lg border bg-muted/40 px-2.5 py-1.5 text-xs text-muted-foreground">
-      <Icon className="size-3.5 shrink-0" />
-      <span className="shrink-0 font-medium text-foreground/80">{item.name}</span>
-      <span className="min-w-0 flex-1 truncate">
-        {summary}
-        {item.steps > 0 && <span className="opacity-70"> · {item.steps} bước{item.status === "running" && item.lastStep ? ` · ${item.lastStep}` : ""}</span>}
-      </span>
-      {item.status === "running" ? (
-        <LoaderCircle className="size-3.5 shrink-0 animate-spin" />
-      ) : item.status === "done" ? (
-        <Check className="size-3.5 shrink-0 text-emerald-600 dark:text-emerald-400" />
-      ) : (
-        <X className="size-3.5 shrink-0 text-destructive" />
+    <div className="rounded-[7px] bg-[#f4f0e8] text-[12px] text-muted-2">
+      <button onClick={() => setOpen((v) => !v)} className="flex w-full min-w-0 items-center gap-2 px-2.5 py-[7px] text-left">
+        {running.length > 0 ? (
+          <span className="size-3 shrink-0 animate-spin-fast rounded-full border-[1.5px] border-primary border-t-transparent" />
+        ) : failed ? (
+          <X className="size-3 shrink-0 text-bad" />
+        ) : (
+          <Check className="size-3 shrink-0 text-ok" />
+        )}
+        <span className="min-w-0 flex-1 truncate">{detail}</span>
+        <span className="shrink-0 font-mono text-[11px]">{steps} bước</span>
+        <ChevronDown className={cn("size-3 shrink-0 transition-transform", open && "rotate-180")} />
+      </button>
+      {open && (
+        <ul className="flex flex-col gap-1 border-t border-[#e9e3d7] px-2.5 py-2">
+          {tools.map((t) => (
+            <li key={t.id} className="flex min-w-0 items-center gap-2">
+              {t.status === "running" ? (
+                <span className="size-2.5 shrink-0 animate-spin-fast rounded-full border border-primary border-t-transparent" />
+              ) : t.status === "done" ? (
+                <Check className="size-2.5 shrink-0 text-ok" />
+              ) : (
+                <X className="size-2.5 shrink-0 text-bad" />
+              )}
+              <span className="min-w-0 flex-1 truncate">{describe(t)}</span>
+              {t.steps > 0 && <span className="shrink-0 font-mono text-[11px]">+{t.steps}</span>}
+            </li>
+          ))}
+        </ul>
       )}
     </div>
   )

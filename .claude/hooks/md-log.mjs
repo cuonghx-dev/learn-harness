@@ -40,6 +40,8 @@ const PROJECT_DIR = process.env.CLAUDE_PROJECT_DIR || resolve(dirname(fileURLToP
 const STATE_FILE = join(PROJECT_DIR, ".claude", "state", "md-log.json")
 const LOCK_FILE = STATE_FILE + ".lock"
 const QA_TOOL = "AskUserQuestion"
+// The Learn app's structured quiz grading (app/src-tauri/resources/learn-mcp.mjs).
+const GRADE_TOOL = "mcp__learn__grade_quiz"
 const MAX_CURSORS = 20
 
 // Built-in commands that are session plumbing, not lesson content.
@@ -194,6 +196,16 @@ function answerBlock(result) {
 	return callout("example", "Trả lời", body)
 }
 
+function gradeBlock(input) {
+	const results = Array.isArray(input?.results) ? input.results : []
+	return results.map((r) => {
+		const correct = Array.isArray(r.correct) ? r.correct.join(", ") : String(r.correct ?? "")
+		const body = [`**${r.ok ? "✓ Đúng" : "✗ Chưa đúng"}** — đáp án: ${correct}`]
+		if (r.explanation) body.push("", ...String(r.explanation).split("\n"))
+		return callout("success", "Đáp án", body).replace("[!success]", "[!success]-")
+	})
+}
+
 // --- Transcript processing ---
 
 /** Read complete JSONL lines from byte `offset`; return entries and the new offset. */
@@ -242,6 +254,10 @@ function entriesToBlocks(entries, asked) {
 					flushAssistant()
 					blocks.push(...questionBlocks(c.input))
 					asked.push(c.id)
+				}
+				if (c.type === "tool_use" && c.name === GRADE_TOOL) {
+					flushAssistant()
+					blocks.push(...gradeBlock(c.input))
 				}
 			}
 			continue

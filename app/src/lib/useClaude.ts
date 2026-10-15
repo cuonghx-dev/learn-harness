@@ -8,15 +8,24 @@ const LAST_SESSION_KEY = "learn:lastSession"
 type Quiz = Extract<ChatItem, { kind: "quiz" }>
 type Permission = Extract<ChatItem, { kind: "permission" }>
 
-function readLastSession(): string | null {
+/** The session "Nối lại session trước" resumes. */
+export type LastSession = { id: string; title?: string; at?: number }
+
+function readLastSession(): LastSession | null {
   try {
-    return localStorage.getItem(LAST_SESSION_KEY)
+    const raw = localStorage.getItem(LAST_SESSION_KEY)
+    if (!raw) return null
+    // Older builds stored the bare session id.
+    if (!raw.startsWith("{")) return { id: raw }
+    const v = JSON.parse(raw) as LastSession
+    return typeof v.id === "string" ? v : null
   } catch {
     return null
   }
 }
 
-export function useClaude() {
+/** `logFile`: the note md-log writes to, used to name the session for resuming. */
+export function useClaude(logFile?: string | null) {
   const [state, dispatch] = useReducer(chatReducer, initialChat)
   // Generation of the process whose events we show; older ones are ignored.
   const gen = useRef(0)
@@ -51,14 +60,19 @@ export function useClaude() {
     return () => subs.forEach((p) => p.then((off) => off()))
   }, [])
 
+  const firstAsk = state.items.find((it) => it.kind === "user")?.text
   useEffect(() => {
     if (!state.sessionId) return
+    const title = logFile?.split("/").pop()?.replace(/\.md$/, "") ?? firstAsk?.split("\n")[0].slice(0, 60)
+    const prev = readLastSession()
+    // A resumed session has no chat yet: keep the name it was saved with.
+    const last: LastSession = { id: state.sessionId, title: title ?? (prev?.id === state.sessionId ? prev.title : undefined), at: Date.now() }
     try {
-      localStorage.setItem(LAST_SESSION_KEY, state.sessionId)
+      localStorage.setItem(LAST_SESSION_KEY, JSON.stringify(last))
     } catch {
       // Storage unavailable: resume just won't be offered.
     }
-  }, [state.sessionId])
+  }, [state.sessionId, logFile, firstAsk, state.busy])
 
   const fail = (e: unknown) => {
     dispatch({ type: "stopped" })

@@ -62,6 +62,7 @@ export const Markdown = memo(function Markdown({ text, baseDir = "", className, 
           <a
             {...rest}
             href="#"
+            className="wikilink"
             onClick={(e) => {
               e.preventDefault()
               onOpenNote?.(target)
@@ -117,8 +118,7 @@ function Mermaid({ code }: { code: string }) {
   useEffect(() => {
     let alive = true
     loadMermaid().then(async (mermaid) => {
-      const dark = document.documentElement.classList.contains("dark")
-      mermaid.initialize({ startOnLoad: false, theme: dark ? "dark" : "neutral", securityLevel: "strict" })
+      mermaid.initialize({ startOnLoad: false, theme: "neutral", securityLevel: "strict" })
       try {
         const { svg } = await mermaid.render(`mmd-${id}`, code)
         if (alive) setSvg(svg)
@@ -132,7 +132,7 @@ function Mermaid({ code }: { code: string }) {
   }, [code, id])
 
   if (error) return <pre><code>{code}</code></pre>
-  if (!svg) return <div className="mermaid-block text-sm text-muted-foreground">Đang vẽ sơ đồ…</div>
+  if (!svg) return <div className="mermaid-block font-sans text-[13px] text-muted-3">Đang vẽ sơ đồ…</div>
   return <div className="mermaid-block" dangerouslySetInnerHTML={{ __html: svg }} />
 }
 

@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet data-dc-atomics><meta name="design_doc_mode" content="canvas"><link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&family=Literata:ital,opsz,wght@0,7..72,400;0,7..72,600;1,7..72,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"><style>body{margin:0;background:#e9e6df;font-family:'Be Vietnam Pro',system-ui,sans-serif;color:#1f1d1a}a{color:#b2552f}a:hover{color:#8a3d1f}.dv-turn{padding:40px 44px 32px;border-bottom:1px solid rgba(0,0,0,.08)}.dv-thd{display:flex;align-items:baseline;gap:10px;margin:0 0 8px}.dv-tid{font:600 10px ui-monospace,Menlo,monospace;padding:3px 7px;background:#1a1a1a;color:#fff;border-radius:4px;text-decoration:none}.dv-tname{font:600 13px/1.2 system-ui,sans-serif;color:#1a1a1a}.dv-opts{display:flex;flex-wrap:wrap;gap:36px;align-items:flex-start}.dv-opt{flex:none;display:flex;flex-direction:column;gap:9px;scroll-margin-top:16px}.dv-oid{font:600 10.5px ui-monospace,Menlo,monospace;padding:3px 7px;background:rgba(0,0,0,.08);color:#1a1a1a;border-radius:5px;text-decoration:none}.dv-olabel{display:flex;align-items:baseline;gap:8px;font:400 12px/1.3 system-ui,sans-serif;color:rgba(0,0,0,.6)}.dv-card{background:#fff;border:1px solid rgba(0,0,0,.1);border-radius:10px;box-shadow:0 12px 40px rgba(40,30,10,.12);overflow:hidden}.dv-opt:target .dv-oid{background:#2a78d6;color:#fff}.dv-next{margin:22px 0 0;font:12px/1.5 system-ui,sans-serif;color:rgba(0,0,0,.5)}@keyframes recpulse{0%,100%{opacity:1}50%{opacity:.35}}</style></helmet>
+<section class="dv-turn" id="t1">
+<div class="dv-thd"><a class="dv-tid" href="#t1">1</a><span class="dv-tname">Learn — màn hình chính theo use-case</span></div>
+<p style="margin:0 0 24px;font:12.5px/1.55 system-ui,sans-serif;color:rgba(0,0,0,.6);max-width:820px">Không có design system nào được đính kèm (project trống), nên mình chọn hướng: giấy ấm, chữ đọc serif Literata cho bài học, Be Vietnam Pro cho UI, một màu nhấn đất nung. Đỏ chỉ dành cho ghi log, vàng chỉ cho thẻ xin quyền — để hai trạng thái này không bao giờ bị nhầm. Cửa sổ 1280×800.</p>
+<div class="dv-opts">
+
+<div class="dv-opt" id="1a"><div class="dv-olabel"><a class="dv-oid" href="#1a">1a</a>UC1 · UC8 — Mở app, chat trống</div>
+<div class="dv-card" style="width:1280px;height:800px;display:flex;flex-direction:column">
+<div style="height:38px;flex:none;display:flex;align-items:center;gap:8px;padding:0 14px;background:#ebe7de;border-bottom:1px solid #ddd6c8"><span style="width:12px;height:12px;border-radius:50%;background:#ff5f57"></span><span style="width:12px;height:12px;border-radius:50%;background:#febc2e"></span><span style="width:12px;height:12px;border-radius:50%;background:#28c840"></span><span style="flex:1;text-align:center;font-size:12px;color:#7a7468;margin-right:52px">Learn</span></div>
+<div style="flex:1;display:flex;min-height:0">
+<aside style="width:248px;flex:none;background:#f3f0e9;border-right:1px solid #e4dfd5;display:flex;flex-direction:column;padding:14px 10px;gap:12px">
+<div style="display:flex;align-items:center;justify-content:space-between;padding:0 6px"><span style="font-size:13px;font-weight:600">Bài học</span><span style="font:500 10.5px 'JetBrains Mono',monospace;color:#8a8478;border:1px solid #ddd6c8;border-radius:4px;padding:1px 5px">⌘B</span></div>
+<div style="display:flex;align-items:center;gap:8px;height:32px;padding:0 10px;background:#fff;border:1px solid #e0dacd;border-radius:7px;font-size:12.5px;color:#9a9488"><span style="width:10px;height:10px;border:1.5px solid #9a9488;border-radius:50%"></span>Tìm bài học</div>
+<div style="display:flex;flex-direction:column;gap:2px">
+<div style="padding:8px 10px;border-radius:7px;display:flex;flex-direction:column;gap:2px"><span style="font-size:13px;font-weight:500">Cấu trúc dữ liệu &amp; giải thuật</span><span style="font-size:11.5px;color:#8a8478">hôm qua</span></div>
+<div style="padding:8px 10px;border-radius:7px;display:flex;flex-direction:column;gap:2px"><span style="font-size:13px;font-weight:500">Đại số tuyến tính</span><span style="font-size:11.5px;color:#8a8478">3 ngày trước</span></div>
+<div style="padding:8px 10px;border-radius:7px;display:flex;flex-direction:column;gap:2px"><span style="font-size:13px;font-weight:500">Rust ownership</span><span style="font-size:11.5px;color:#8a8478">1 tuần trước</span></div>
+<div style="padding:8px 10px;border-radius:7px;display:flex;flex-direction:column;gap:2px"><span style="font-size:13px;font-weight:500">Định lý Bayes</span><span style="font-size:11.5px;color:#8a8478">2 tuần trước</span></div>
+<div style="padding:8px 10px;border-radius:7px;display:flex;flex-direction:column;gap:2px"><span style="font-size:13px;font-weight:500">Git internals</span><span style="font-size:11.5px;color:#8a8478">3 tuần trước</span></div>
+</div>
+</aside>
+<main style="flex:1;min-width:0;background:#faf8f4;display:flex;align-items:center;justify-content:center">
+<div style="display:flex;flex-direction:column;align-items:center;gap:14px;color:#8a8478;text-align:center">
+<span style="font:400 22px 'Literata',serif;color:#5d584e">Chưa mở bài nào</span>
+<span style="font-size:13px;max-width:300px;line-height:1.55">Chọn một bài bên trái, hoặc bật <b style="color:#5d584e;font-weight:600">● Ghi log</b> để buổi học hiện ra ở đây.</span>
+<div style="display:flex;gap:16px;margin-top:6px;font-size:12px"><span><span style="font-family:'JetBrains Mono',monospace;border:1px solid #ddd6c8;border-radius:4px;padding:1px 5px">⌘B</span> danh sách</span><span><span style="font-family:'JetBrains Mono',monospace;border:1px solid #ddd6c8;border-radius:4px;padding:1px 5px">⌘J</span> trò chuyện</span></div>
+</div>
+</main>
+<aside style="width:400px;flex:none;background:#fdfcf9;border-left:1px solid #e4dfd5;display:flex;flex-direction:column">
+<div style="height:50px;flex:none;display:flex;align-items:center;gap:8px;padding:0 14px;border-bottom:1px solid #ece7dd"><span style="font-size:13px;font-weight:600;flex:1">Trò chuyện</span><span style="display:flex;align-items:center;gap:6px;height:28px;padding:0 11px;border:1px solid #ddd6c8;border-radius:14px;font-size:12px;font-weight:500;color:#5d584e"><span style="width:7px;height:7px;border-radius:50%;background:#d6403a"></span>Ghi log</span><span style="width:28px;height:28px;display:flex;align-items:center;justify-content:center;border-radius:7px;font-size:16px;color:#5d584e">＋</span></div>
+<div style="flex:1;display:flex;flex-direction:column;justify-content:center;padding:0 28px;gap:22px">
+<span style="font:400 30px/1.2 'Literata',serif;letter-spacing:-.01em">Hôm nay học gì?</span>
+<div style="display:flex;flex-direction:column;gap:8px">
+<div style="padding:11px 14px;border:1px solid #e4dfd5;border-radius:9px;font-size:13px;background:#fff">Dạy tôi TCP/IP hoạt động thế nào</div>
+<div style="padding:11px 14px;border:1px solid #e4dfd5;border-radius:9px;font-size:13px;background:#fff">Giải thích quy hoạch động bằng ví dụ</div>
+<div style="padding:11px 14px;border:1px solid #e4dfd5;border-radius:9px;font-size:13px;background:#fff">Ôn lại Đại số tuyến tính bằng quiz</div>
+</div>
+<div style="display:flex;align-items:center;gap:10px;padding:12px 14px;border-radius:9px;background:#f3eee4"><span style="font-size:15px;color:#b2552f">↺</span><div style="display:flex;flex-direction:column;gap:2px;flex:1"><span style="font-size:13px;font-weight:600">Nối lại session trước</span><span style="font-size:11.5px;color:#7a7468">Cấu trúc dữ liệu &amp; giải thuật · hôm qua</span></div><span style="color:#8a8478">→</span></div>
+</div>
+<div style="padding:12px 14px 14px"><div style="border:1px solid #ddd6c8;border-radius:12px;background:#fff;padding:12px 12px 8px;display:flex;flex-direction:column;gap:10px"><span style="font-size:13.5px;color:#9a9488;min-height:36px">Hỏi Claude…</span><div style="display:flex;align-items:center;gap:8px"><span style="font:400 11px 'JetBrains Mono',monospace;color:#9a9488;flex:1">claude-sonnet-4.5</span><span style="font-size:11px;color:#a9a397">Enter gửi · ⇧Enter xuống dòng</span><span style="width:28px;height:28px;border-radius:8px;background:#e7e2d8;color:#fff;display:flex;align-items:center;justify-content:center;font-size:14px">↑</span></div></div></div>
+</aside>
+</div></div></div>
+
+<div class="dv-opt" id="1b"><div class="dv-olabel"><a class="dv-oid" href="#1b">1b</a>UC5 · UC8 — Bấm ● Ghi log: đặt tên bài hoặc ghi tiếp</div>
+<div class="dv-card" style="width:1280px;height:800px;display:flex;flex-direction:column">
+<div style="height:38px;flex:none;display:flex;align-items:center;gap:8px;padding:0 14px;background:#ebe7de;border-bottom:1px solid #ddd6c8"><span style="width:12px;height:12px;border-radius:50%;background:#ff5f57"></span><span style="width:12px;height:12px;border-radius:50%;background:#febc2e"></span><span style="width:12px;height:12px;border-radius:50%;background:#28c840"></span><span style="flex:1;text-align:center;font-size:12px;color:#7a7468;margin-right:52px">Learn</span></div>
+<div style="flex:1;display:flex;min-height:0">
+<aside style="width:248px;flex:none;background:#f3f0e9;border-right:1px solid #e4dfd5;display:flex;flex-direction:column;padding:14px 10px;gap:12px">
+<div style="display:flex;align-items:center;justify-content:space-between;padding:0 6px"><span style="font-size:13px;font-weight:600">Bài học</span><span style="font:500 10.5px 'JetBrains Mono',monospace;color:#8a8478;border:1px solid #ddd6c8;border-radius:4px;padding:1px 5px">⌘B</span></div>
+<div style="display:flex;align-items:center;gap:8px;height:32px;padding:0 10px;background:#fff;border:1px solid #e0dacd;border-radius:7px;font-size:12.5px;color:#9a9488"><span style="width:10px;height:10px;border:1.5px solid #9a9488;border-radius:50%"></span>Tìm bài học</div>
+<div style="display:flex;flex-direction:column;gap:2px">
+<div style="padding:8px 10px;border-radius:7px;display:flex;flex-direction:column;gap:2px"><span style="font-size:13px;font-weight:500">Cấu trúc dữ liệu &amp; giải thuật</span><span style="font-size:11.5px;color:#8a8478">hôm qua</span></div>
+<div style="padding:8px 10px;border-radius:7px;display:flex;flex-direction:column;gap:2px"><span style="font-size:13px;font-weight:500">Đại số tuyến tính</span><span style="font-size:11.5px;color:#8a8478">3 ngày trước</span></div>
+<div style="padding:8px 10px;border-radius:7px;display:flex;flex-direction:column;gap:2px"><span style="font-size:13px;font-weight:500">Rust ownership</span><span style="font-size:11.5px;color:#8a8478">1 tuần trước</span></div>
+<div style="padding:8px 10px;border-radius:7px;display:flex;flex-direction:column;gap:2px"><span style="font-size:13px;font-weight:500">Định lý Bayes</span><span style="font-size:11.5px;color:#8a8478">2 tuần trước</span></div>
+</div>
+</aside>
+<main style="flex:1;min-width:0;background:#faf8f4"></main>
+<aside style="width:400px;flex:none;background:#fdfcf9;border-left:1px solid #e4dfd5;display:flex;flex-direction:column;position:relative">
+<div style="height:50px;flex:none;display:flex;align-items:center;gap:8px;padding:0 14px;border-bottom:1px solid #ece7dd"><span style="font-size:13px;font-weight:600;flex:1">Trò chuyện</span><span style="display:flex;align-items:center;gap:6px;height:28px;padding:0 11px;border:1px solid #c9bfae;background:#f3eee4;border-radius:14px;font-size:12px;font-weight:500;color:#3d3a34"><span style="width:7px;height:7px;border-radius:50%;background:#d6403a"></span>Ghi log</span><span style="width:28px;height:28px;display:flex;align-items:center;justify-content:center;border-radius:7px;font-size:16px;color:#5d584e">＋</span></div>
+<div style="flex:1;padding:20px 18px;display:flex;flex-direction:column;gap:16px;font-size:14px;line-height:1.6">
+<div style="align-self:flex-end;max-width:80%;background:#efe9de;padding:9px 13px;border-radius:13px 13px 4px 13px">Dạy tôi cấu trúc dữ liệu cơ bản</div>
+<div style="color:#3d3a34">Trước khi bắt đầu, mình muốn biết bạn đã quen với Big-O chưa…</div>
+</div>
+<div style="position:absolute;top:44px;left:-56px;right:14px;background:#fff;border:1px solid #ddd6c8;border-radius:12px;box-shadow:0 18px 50px rgba(40,30,10,.18);padding:16px;display:flex;flex-direction:column;gap:14px">
+<span style="font-size:13px;font-weight:600">Ghi buổi học ra file</span>
+<div style="display:flex;flex-direction:column;gap:6px"><div style="height:38px;border:1.5px solid #b2552f;border-radius:8px;display:flex;align-items:center;padding:0 12px;font-size:14px;box-shadow:0 0 0 3px rgba(178,85,47,.12)">Cấu trúc dữ liệu &amp; giải thuật<span style="width:1.5px;height:17px;background:#1f1d1a;margin-left:1px"></span></div><span style="font:400 11.5px 'JetBrains Mono',monospace;color:#7a7468">→ notes/cau-truc-du-lieu-giai-thuat.md</span></div>
+<span style="font-size:12px;color:#7a7468;line-height:1.5">Ghi cả phần đã trò chuyện trước khi bấm ghi.</span>
+<div style="display:flex;gap:8px;justify-content:flex-end"><span style="height:32px;padding:0 14px;display:flex;align-items:center;border-radius:8px;font-size:13px;color:#5d584e">Huỷ</span><span style="height:32px;padding:0 14px;display:flex;align-items:center;gap:8px;border-radius:8px;font-size:13px;font-weight:600;background:#1f1d1a;color:#fff">Bắt đầu ghi <span style="font:400 11px 'JetBrains Mono',monospace;opacity:.6">↵</span></span></div>
+<div style="height:1px;background:#ece7dd"></div>
+<span style="font-size:11.5px;font-weight:600;color:#8a8478;text-transform:uppercase;letter-spacing:.06em">Hoặc ghi tiếp vào bài có sẵn</span>
+<div style="display:flex;flex-direction:column;gap:2px;margin:-6px -6px 0">
+<div style="display:flex;align-items:center;gap:10px;padding:8px 8px;border-radius:7px;background:#f6f2ea"><span style="font-size:13px;flex:1">Đại số tuyến tính</span><span style="font:400 11px 'JetBrains Mono',monospace;color:#9a9488">dai-so-tuyen-tinh.md</span></div>
+<div style="display:flex;align-items:center;gap:10px;padding:8px 8px;border-radius:7px"><span style="font-size:13px;flex:1">Rust ownership</span><span style="font:400 11px 'JetBrains Mono',monospace;color:#9a9488">rust-ownership.md</span></div>
+<div style="display:flex;align-items:center;gap:10px;padding:8px 8px;border-radius:7px"><span style="font-size:13px;flex:1">Định lý Bayes</span><span style="font:400 11px 'JetBrains Mono',monospace;color:#9a9488">dinh-ly-bayes.md</span></div>
+</div>
+</div>
+<div style="padding:12px 14px 14px"><div style="border:1px solid #ddd6c8;border-radius:12px;background:#fff;padding:12px 12px 8px;display:flex;flex-direction:column;gap:10px"><span style="font-size:13.5px;color:#9a9488;min-height:36px">Hỏi Claude…</span><div style="display:flex;align-items:center;gap:8px"><span style="font:400 11px 'JetBrains Mono',monospace;color:#9a9488;flex:1">claude-sonnet-4.5</span><span style="width:28px;height:28px;border-radius:8px;background:#e7e2d8;color:#fff;display:flex;align-items:center;justify-content:center;font-size:14px">↑</span></div></div></div>
+</aside>
+</div></div></div>
+
+<div class="dv-opt" id="1c"><div class="dv-olabel"><a class="dv-oid" href="#1c">1c</a>UC2 · UC3 · UC6 — Đang ghi, Claude giảng, thẻ quiz</div>
+<div class="dv-card" style="width:1280px;height:800px;display:flex;flex-direction:column">
+<div style="height:38px;flex:none;display:flex;align-items:center;gap:8px;padding:0 14px;background:#ebe7de;border-bottom:1px solid #ddd6c8"><span style="width:12px;height:12px;border-radius:50%;background:#ff5f57"></span><span style="width:12px;height:12px;border-radius:50%;background:#febc2e"></span><span style="width:12px;height:12px;border-radius:50%;background:#28c840"></span><span style="flex:1;text-align:center;font-size:12px;color:#7a7468;margin-right:52px">Learn — TCP/IP</span></div>
+<div style="flex:1;display:flex;min-height:0">
+<aside style="width:248px;flex:none;background:#f3f0e9;border-right:1px solid #e4dfd5;display:flex;flex-direction:column;padding:14px 10px;gap:12px">
+<div style="display:flex;align-items:center;justify-content:space-between;padding:0 6px"><span style="font-size:13px;font-weight:600">Bài học</span><span style="font:500 10.5px 'JetBrains Mono',monospace;color:#8a8478;border:1px solid #ddd6c8;border-radius:4px;padding:1px 5px">⌘B</span></div>
+<div style="display:flex;align-items:center;gap:8px;height:32px;padding:0 10px;background:#fff;border:1px solid #e0dacd;border-radius:7px;font-size:12.5px;color:#9a9488"><span style="width:10px;height:10px;border:1.5px solid #9a9488;border-radius:50%"></span>Tìm bài học</div>
+<div style="display:flex;flex-direction:column;gap:2px">
+<div style="padding:8px 10px;border-radius:7px;display:flex;flex-direction:column;gap:2px;background:#e6e0d4"><span style="font-size:13px;font-weight:600;display:flex;align-items:center;gap:7px">TCP/IP<span style="width:7px;height:7px;border-radius:50%;background:#d6403a"></span></span><span style="font-size:11.5px;color:#7a7468">vừa xong</span></div>
+<div style="padding:8px 10px;border-radius:7px;display:flex;flex-direction:column;gap:2px"><span style="font-size:13px;font-weight:500">Cấu trúc dữ liệu &amp; giải thuật</span><span style="font-size:11.5px;color:#8a8478">hôm qua</span></div>
+<div style="padding:8px 10px;border-radius:7px;display:flex;flex-direction:column;gap:2px"><span style="font-size:13px;font-weight:500">Đại số tuyến tính</span><span style="font-size:11.5px;color:#8a8478">3 ngày trước</span></div>
+<div style="padding:8px 10px;border-radius:7px;display:flex;flex-direction:column;gap:2px"><span style="font-size:13px;font-weight:500">Rust ownership</span><span style="font-size:11.5px;color:#8a8478">1 tuần trước</span></div>
+<div style="padding:8px 10px;border-radius:7px;display:flex;flex-direction:column;gap:2px"><span style="font-size:13px;font-weight:500">Định lý Bayes</span><span style="font-size:11.5px;color:#8a8478">2 tuần trước</span></div>
+</div>
+</aside>
+<main style="flex:1;min-width:0;background:#faf8f4;display:flex;flex-direction:column;overflow:hidden">
+<div style="height:50px;flex:none;display:flex;align-items:center;gap:10px;padding:0 28px;border-bottom:1px solid #ece7dd"><span style="font:400 11.5px 'JetBrains Mono',monospace;color:#8a8478;flex:1">notes/tcp-ip.md</span><span style="display:flex;align-items:center;gap:6px;font-size:11.5px;font-weight:600;color:#b8322c;background:#fbe9e6;padding:4px 9px;border-radius:5px"><span style="width:6px;height:6px;border-radius:50%;background:#d6403a;animation:recpulse 1.4s infinite"></span>Đang ghi</span></div>
+<div style="flex:1;overflow:hidden;padding:36px 0 0"><article style="max-width:600px;margin:0 auto;padding:0 32px;font:400 16.5px/1.7 'Literata',serif;color:#2a2722;display:flex;flex-direction:column;gap:16px">
+<h1 style="margin:0;font-size:32px;font-weight:600;line-height:1.2;letter-spacing:-.01em">TCP/IP</h1>
+<p style="margin:0">Internet không phải một giao thức, mà là một <i>chồng</i> giao thức. Mỗi tầng chỉ nói chuyện với tầng ngay trên và ngay dưới nó.</p>
+<div style="display:flex;flex-direction:column;gap:4px;font-family:'Be Vietnam Pro',sans-serif;font-size:13px;margin:4px 0">
+<div style="display:flex;align-items:center;gap:14px;padding:10px 14px;background:#f1e4da;border-radius:6px"><b style="width:90px;font-weight:600">Ứng dụng</b><span style="color:#6b5a4e">HTTP · DNS · SMTP</span></div>
+<div style="display:flex;align-items:center;gap:14px;padding:10px 14px;background:#ece6d9;border-radius:6px;box-shadow:inset 0 0 0 1.5px #b2552f"><b style="width:90px;font-weight:600">Giao vận</b><span style="color:#6b5a4e">TCP · UDP</span><span style="margin-left:auto;font-size:11px;color:#b2552f;font-weight:600">đang học</span></div>
+<div style="display:flex;align-items:center;gap:14px;padding:10px 14px;background:#e6e5dc;border-radius:6px"><b style="width:90px;font-weight:600">Mạng</b><span style="color:#5e5d52">IP · ICMP</span></div>
+<div style="display:flex;align-items:center;gap:14px;padding:10px 14px;background:#e1e3dd;border-radius:6px"><b style="width:90px;font-weight:600">Liên kết</b><span style="color:#585d55">Ethernet · Wi-Fi</span></div>
+</div>
+<h2 style="margin:10px 0 0;font-size:21px;font-weight:600">Bắt tay ba bước</h2>
+<p style="margin:0">Trước khi gửi dữ liệu, TCP mở kết nối bằng ba gói: <code style="font:400 14px 'JetBrains Mono',monospace;background:#efe9de;padding:1px 5px;border-radius:4px">SYN</code>, <code style="font:400 14px 'JetBrains Mono',monospace;background:#efe9de;padding:1px 5px;border-radius:4px">SYN-ACK</code>, <code style="font:400 14px 'JetBrains Mono',monospace;background:#efe9de;padding:1px 5px;border-radius:4px">ACK</code>. Mục đích là để hai bên thống nhất số thứ tự ban đầu</p>
+<div style="border-left:2px solid #d8cfbf;padding:2px 0 2px 16px;display:flex;flex-direction:column;gap:6px;font-size:15px"><div><b style="font-family:'Be Vietnam Pro',sans-serif;font-size:12px;font-weight:600;color:#8a8478;margin-right:8px">BẠN</b>Sao không chỉ hai bước?</div><div><b style="font-family:'Be Vietnam Pro',sans-serif;font-size:12px;font-weight:600;color:#b2552f;margin-right:8px">CLAUDE</b>Vì cả hai chiều đều cần xác nhận số thứ tự của bên kia…</div></div>
+</article></div>
+</main>
+<aside style="width:400px;flex:none;background:#fdfcf9;border-left:1px solid #e4dfd5;display:flex;flex-direction:column;position:relative">
+<span style="position:absolute;left:-3px;top:50%;width:5px;height:36px;margin-top:-18px;border-radius:3px;background:#d3cbbb"></span>
+<div style="height:50px;flex:none;display:flex;align-items:center;gap:8px;padding:0 14px;border-bottom:1px solid #ece7dd"><span style="font-size:13px;font-weight:600;flex:1">Trò chuyện</span><span style="display:flex;align-items:center;gap:7px;height:28px;padding:0 11px;background:#d6403a;color:#fff;border-radius:14px;font-size:12px;font-weight:600"><span style="width:7px;height:7px;border-radius:50%;background:#fff;animation:recpulse 1.4s infinite"></span>tcp-ip.md</span><span style="width:28px;height:28px;display:flex;align-items:center;justify-content:center;border-radius:7px;font-size:16px;color:#5d584e">＋</span></div>
+<div style="flex:1;padding:18px 18px;display:flex;flex-direction:column;gap:14px;font-size:14px;line-height:1.6;overflow:hidden;justify-content:flex-end">
+<div style="align-self:flex-end;max-width:80%;background:#efe9de;padding:9px 13px;border-radius:13px 13px 4px 13px">giảng luôn, đừng hỏi nhiều</div>
+<div style="display:flex;align-items:center;gap:8px;font-size:12px;color:#7a7468;padding:7px 10px;background:#f4f0e8;border-radius:7px"><span style="width:12px;height:12px;border:1.5px solid #b2552f;border-top-color:transparent;border-radius:50%"></span><span style="flex:1">Tra cứu RFC 793, vẽ sơ đồ bắt tay</span><span style="font-family:'JetBrains Mono',monospace;font-size:11px">3 bước</span></div>
+<div style="color:#3d3a34">Được. Mình giảng liền mạch phần bắt tay, chỉ dừng một lần để kiểm tra:</div>
+<div style="border:1.5px solid #b2552f;border-radius:12px;background:#fff;padding:14px;display:flex;flex-direction:column;gap:10px;box-shadow:0 4px 16px rgba(178,85,47,.10)">
+<div style="display:flex;align-items:center;gap:8px"><span style="font-size:11px;font-weight:700;letter-spacing:.06em;color:#b2552f">QUIZ</span><span style="font-size:11px;color:#7a7468;border:1px solid #ddd6c8;border-radius:4px;padding:0 6px">chọn nhiều</span></div>
+<span style="font-size:14px;font-weight:500;line-height:1.5">Gói nào trong bắt tay ba bước mang cờ SYN?</span>
+<div style="display:flex;flex-direction:column;gap:6px;font-size:13.5px">
+<div style="display:flex;align-items:center;gap:10px;padding:8px 10px;border:1px solid #b2552f;background:#fbf1ea;border-radius:8px"><span style="width:16px;height:16px;border-radius:4px;background:#b2552f;color:#fff;font-size:11px;display:flex;align-items:center;justify-content:center">✓</span><span style="flex:1">Gói thứ nhất</span><span style="font:400 11px 'JetBrains Mono',monospace;color:#9a9488">1</span></div>
+<div style="display:flex;align-items:center;gap:10px;padding:8px 10px;border:1px solid #b2552f;background:#fbf1ea;border-radius:8px"><span style="width:16px;height:16px;border-radius:4px;background:#b2552f;color:#fff;font-size:11px;display:flex;align-items:center;justify-content:center">✓</span><span style="flex:1">Gói thứ hai</span><span style="font:400 11px 'JetBrains Mono',monospace;color:#9a9488">2</span></div>
+<div style="display:flex;align-items:center;gap:10px;padding:8px 10px;border:1px solid #e4dfd5;border-radius:8px"><span style="width:16px;height:16px;border-radius:4px;border:1.5px solid #c9bfae;box-sizing:border-box"></span><span style="flex:1">Gói thứ ba</span><span style="font:400 11px 'JetBrains Mono',monospace;color:#9a9488">3</span></div>
+<div style="display:flex;align-items:center;gap:10px;padding:8px 10px;border:1px dashed #d8cfbf;border-radius:8px;color:#7a7468"><span style="width:16px;height:16px;border-radius:4px;border:1.5px solid #c9bfae;box-sizing:border-box"></span><span style="flex:1">Tôi không biết</span><span style="font:400 11px 'JetBrains Mono',monospace;color:#9a9488">4</span></div>
+</div>
+<div style="height:34px;border:1px solid #e4dfd5;border-radius:8px;display:flex;align-items:center;padding:0 10px;font-size:13px;color:#9a9488">Hoặc tự gõ câu trả lời…</div>
+<div style="display:flex;justify-content:flex-end;gap:8px"><span style="height:30px;padding:0 12px;display:flex;align-items:center;font-size:13px;color:#5d584e">Bỏ qua</span><span style="height:30px;padding:0 14px;display:flex;align-items:center;border-radius:8px;font-size:13px;font-weight:600;background:#b2552f;color:#fff">Gửi</span></div>
+</div>
+</div>
+<div style="padding:12px 14px 14px"><div style="border:1px solid #e4dfd5;border-radius:12px;background:#f7f4ee;padding:12px 12px 8px;display:flex;flex-direction:column;gap:10px"><span style="font-size:13px;color:#b2552f;min-height:36px">Trả lời quiz ở trên trước nhé ↑</span><div style="display:flex;align-items:center;gap:8px"><span style="font:400 11px 'JetBrains Mono',monospace;color:#9a9488;flex:1">claude-sonnet-4.5</span><span style="width:28px;height:28px;border-radius:8px;background:#e7e2d8;color:#fff;display:flex;align-items:center;justify-content:center;font-size:14px">↑</span></div></div></div>
+</aside>
+</div></div></div>
+
+<div class="dv-opt" id="1d"><div class="dv-olabel"><a class="dv-oid" href="#1d">1d</a>UC3 · UC4 · UC6 · UC9 — Chấm quiz, xin quyền, ngừng tự cuộn, nút ■</div>
+<div class="dv-card" style="width:1280px;height:800px;display:flex;flex-direction:column">
+<div style="height:38px;flex:none;display:flex;align-items:center;gap:8px;padding:0 14px;background:#ebe7de;border-bottom:1px solid #ddd6c8"><span style="width:12px;height:12px;border-radius:50%;background:#ff5f57"></span><span style="width:12px;height:12px;border-radius:50%;background:#febc2e"></span><span style="width:12px;height:12px;border-radius:50%;background:#28c840"></span><span style="flex:1;text-align:center;font-size:12px;color:#7a7468;margin-right:52px">Learn — TCP/IP</span></div>
+<div style="flex:1;display:flex;min-height:0">
+<aside style="width:248px;flex:none;background:#f3f0e9;border-right:1px solid #e4dfd5;display:flex;flex-direction:column;padding:14px 10px;gap:12px">
+<div style="display:flex;align-items:center;justify-content:space-between;padding:0 6px"><span style="font-size:13px;font-weight:600">Bài học</span><span style="font:500 10.5px 'JetBrains Mono',monospace;color:#8a8478;border:1px solid #ddd6c8;border-radius:4px;padding:1px 5px">⌘B</span></div>
+<div style="display:flex;align-items:center;gap:8px;height:32px;padding:0 10px;background:#fff;border:1.5px solid #b2552f;border-radius:7px;font-size:12.5px;color:#1f1d1a"><span style="width:10px;height:10px;border:1.5px solid #7a7468;border-radius:50%"></span><span style="flex:1">t</span><span style="color:#9a9488">×</span></div>
+<div style="display:flex;flex-direction:column;gap:2px">
+<div style="padding:8px 10px;border-radius:7px;display:flex;flex-direction:column;gap:2px;background:#e6e0d4"><span style="font-size:13px;font-weight:600;display:flex;align-items:center;gap:7px"><span><mark style="background:#f3d9c9;color:inherit;border-radius:2px">T</mark>CP/IP</span><span style="width:7px;height:7px;border-radius:50%;background:#d6403a"></span></span><span style="font-size:11.5px;color:#7a7468">vừa xong</span></div>
+<div style="padding:8px 10px;border-radius:7px;display:flex;flex-direction:column;gap:2px"><span style="font-size:13px;font-weight:500">Đại số <mark style="background:#f3d9c9;color:inherit;border-radius:2px">t</mark>uyến tính</span><span style="font-size:11.5px;color:#8a8478">3 ngày trước</span></div>
+<div style="padding:8px 10px;border-radius:7px;display:flex;flex-direction:column;gap:2px"><span style="font-size:13px;font-weight:500">Định lý Bayes</span><span style="font-size:11.5px;color:#8a8478">2 tuần trước</span></div>
+<div style="padding:8px 10px;border-radius:7px;display:flex;flex-direction:column;gap:2px"><span style="font-size:13px;font-weight:500">Gi<mark style="background:#f3d9c9;color:inherit;border-radius:2px">t</mark> internals</span><span style="font-size:11.5px;color:#8a8478">3 tuần trước</span></div>
+</div>
+</aside>
+<main style="flex:1;min-width:0;background:#faf8f4;display:flex;flex-direction:column;overflow:hidden;position:relative">
+<div style="height:50px;flex:none;display:flex;align-items:center;gap:10px;padding:0 28px;border-bottom:1px solid #ece7dd"><span style="font:400 11.5px 'JetBrains Mono',monospace;color:#8a8478;flex:1">notes/tcp-ip.md</span><span style="display:flex;align-items:center;gap:6px;font-size:11.5px;font-weight:600;color:#b8322c;background:#fbe9e6;padding:4px 9px;border-radius:5px"><span style="width:6px;height:6px;border-radius:50%;background:#d6403a;animation:recpulse 1.4s infinite"></span>Đang ghi</span></div>
+<div style="flex:1;overflow:hidden;padding:36px 0 0"><article style="max-width:600px;margin:0 auto;padding:0 32px;font:400 16.5px/1.7 'Literata',serif;color:#2a2722;display:flex;flex-direction:column;gap:16px">
+<p style="margin:0">Internet không phải một giao thức, mà là một <i>chồng</i> giao thức. Mỗi tầng chỉ nói chuyện với tầng ngay trên và ngay dưới nó. Xem thêm <a href="#1d" style="text-decoration:none;border-bottom:1px solid #e3c2b0">[[mo-hinh-osi]]</a>.</p>
+<div style="border:1px solid #e4dfd5;border-radius:10px;background:#fff;padding:16px 18px;display:flex;flex-direction:column;gap:8px;font-family:'Be Vietnam Pro',sans-serif;font-size:13.5px">
+<span style="font-size:11px;font-weight:700;letter-spacing:.06em;color:#8a8478">CÂU HỎI</span>
+<span style="font-weight:500">Gói nào trong bắt tay ba bước mang cờ SYN?</span>
+<span style="color:#2f6b3a">✓ Gói thứ nhất · ✓ Gói thứ hai</span>
+<span style="color:#5d584e;line-height:1.55">SYN-ACK là gói phản hồi nhưng vẫn bật cờ SYN, vì máy chủ cũng gửi số thứ tự của nó.</span>
+</div>
+<h2 style="margin:10px 0 0;font-size:21px;font-weight:600">Cửa sổ trượt</h2>
+<p style="margin:0">Sau khi kết nối mở, bên gửi không chờ xác nhận từng gói. Nó được phép gửi trước tối đa <i>W</i> byte — gọi là cửa sổ — rồi trượt cửa sổ về phía trước mỗi khi nhận được ACK.</p>
+<p style="margin:0">Kích thước cửa sổ do bên nhận quyết định, dựa trên dung lượng bộ đệm còn trống</p>
+</article></div>
+<div style="position:absolute;bottom:22px;left:50%;transform:translateX(-50%);display:flex;align-items:center;gap:8px;height:34px;padding:0 14px;border-radius:17px;background:#1f1d1a;color:#fff;font-size:12.5px;font-weight:500;box-shadow:0 8px 24px rgba(0,0,0,.18)">↓ Nội dung mới · đã tạm ngừng tự cuộn</div>
+</main>
+<aside style="width:400px;flex:none;background:#fdfcf9;border-left:1px solid #e4dfd5;display:flex;flex-direction:column">
+<div style="height:50px;flex:none;display:flex;align-items:center;gap:8px;padding:0 14px;border-bottom:1px solid #ece7dd"><span style="font-size:13px;font-weight:600;flex:1">Trò chuyện</span><span style="display:flex;align-items:center;gap:7px;height:28px;padding:0 11px;background:#d6403a;color:#fff;border-radius:14px;font-size:12px;font-weight:600"><span style="width:7px;height:7px;border-radius:50%;background:#fff;animation:recpulse 1.4s infinite"></span>tcp-ip.md</span><span style="width:28px;height:28px;display:flex;align-items:center;justify-content:center;border-radius:7px;font-size:16px;color:#5d584e">＋</span></div>
+<div style="flex:1;padding:18px 18px;display:flex;flex-direction:column;gap:14px;font-size:14px;line-height:1.6;overflow:hidden;justify-content:flex-end">
+<div style="border:1px solid #e4dfd5;border-radius:12px;background:#fff;padding:12px 14px;display:flex;flex-direction:column;gap:6px;font-size:13px">
+<span style="font-size:11px;font-weight:700;letter-spacing:.06em;color:#8a8478">QUIZ · ĐÃ CHẤM</span>
+<div style="display:flex;gap:8px"><span style="color:#2f7d3e;font-weight:700">✓</span><span>Gói thứ nhất</span></div>
+<div style="display:flex;gap:8px"><span style="color:#2f7d3e;font-weight:700">✓</span><span>Gói thứ hai</span></div>
+<span style="color:#5d584e;line-height:1.5">Đúng cả hai. SYN-ACK vẫn mang cờ SYN.</span>
+</div>
+<div style="color:#3d3a34">Để minh hoạ cửa sổ trượt, mình sẽ vẽ biểu đồ số byte đã gửi theo thời gian.</div>
+<div style="border:1.5px solid #e2b54a;background:#fdf5e1;border-radius:12px;padding:14px;display:flex;flex-direction:column;gap:10px">
+<div style="display:flex;align-items:center;gap:8px"><span style="width:18px;height:18px;border-radius:50%;background:#e2b54a;color:#fff;font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center">!</span><span style="font-size:13px;font-weight:600;color:#5b3f00">Claude muốn chạy lệnh</span><span style="margin-left:auto;font:500 11px 'JetBrains Mono',monospace;color:#8a6a1e">Bash</span></div>
+<div style="font:400 12.5px/1.5 'JetBrains Mono',monospace;background:#fffbf0;border:1px solid #efd99a;border-radius:7px;padding:9px 11px;color:#3d2c00">python3 scripts/plot_window.py \<br>  --out notes/img/window.png</div>
+<span style="font-size:12px;color:#6b5420">Ghi file mới: <span style="font-family:'JetBrains Mono',monospace">notes/img/window.png</span></span>
+<div style="display:flex;gap:6px;flex-wrap:wrap"><span style="height:30px;padding:0 13px;display:flex;align-items:center;border-radius:7px;font-size:12.5px;font-weight:600;background:#1f1d1a;color:#fff">Cho phép</span><span style="height:30px;padding:0 13px;display:flex;align-items:center;border-radius:7px;font-size:12.5px;font-weight:500;background:#fff;border:1px solid #e2cf9a;color:#3d2c00">Luôn cho phép Bash</span><span style="height:30px;padding:0 13px;display:flex;align-items:center;border-radius:7px;font-size:12.5px;font-weight:500;color:#6b5420">Từ chối</span></div>
+</div>
+</div>
+<div style="padding:12px 14px 14px"><div style="border:1px solid #ddd6c8;border-radius:12px;background:#fff;padding:12px 12px 8px;display:flex;flex-direction:column;gap:10px"><span style="font-size:13.5px;color:#9a9488;min-height:36px">Hỏi Claude…</span><div style="display:flex;align-items:center;gap:8px"><span style="font:400 11px 'JetBrains Mono',monospace;color:#9a9488;flex:1">claude-sonnet-4.5</span><span style="width:28px;height:28px;border-radius:8px;background:#1f1d1a;display:flex;align-items:center;justify-content:center"><span style="width:9px;height:9px;background:#fff;border-radius:1.5px"></span></span></div></div></div>
+</aside>
+</div></div></div>
+
+<div class="dv-opt" id="1e"><div class="dv-olabel"><a class="dv-oid" href="#1e">1e</a>UC7 · UC10 — Ôn bài cũ, toàn màn hình (⌘B + ⌘J ẩn)</div>
+<div class="dv-card" style="width:1280px;height:800px;display:flex;flex-direction:column">
+<div style="height:38px;flex:none;display:flex;align-items:center;gap:8px;padding:0 14px;background:#ebe7de;border-bottom:1px solid #ddd6c8"><span style="width:12px;height:12px;border-radius:50%;background:#ff5f57"></span><span style="width:12px;height:12px;border-radius:50%;background:#febc2e"></span><span style="width:12px;height:12px;border-radius:50%;background:#28c840"></span><span style="flex:1;text-align:center;font-size:12px;color:#7a7468;margin-right:52px">Learn — Cấu trúc dữ liệu &amp; giải thuật</span></div>
+<main style="flex:1;min-height:0;background:#faf8f4;display:flex;flex-direction:column;position:relative;overflow:hidden">
+<div style="height:50px;flex:none;display:flex;align-items:center;gap:12px;padding:0 24px"><span style="font:500 10.5px 'JetBrains Mono',monospace;color:#8a8478;border:1px solid #ddd6c8;border-radius:4px;padding:2px 6px">⌘B</span><span style="font:400 11.5px 'JetBrains Mono',monospace;color:#8a8478;flex:1">notes/cau-truc-du-lieu-giai-thuat.md · sửa hôm qua</span><span style="font:500 10.5px 'JetBrains Mono',monospace;color:#8a8478;border:1px solid #ddd6c8;border-radius:4px;padding:2px 6px">⌘J</span></div>
+<article style="max-width:660px;margin:0 auto;padding:18px 32px 0;font:400 17.5px/1.75 'Literata',serif;color:#2a2722;display:flex;flex-direction:column;gap:18px">
+<h1 style="margin:0;font-size:38px;font-weight:600;line-height:1.15;letter-spacing:-.015em">Cấu trúc dữ liệu &amp; giải thuật</h1>
+<h2 style="margin:8px 0 0;font-size:22px;font-weight:600">Merge sort</h2>
+<p style="margin:0">Chia mảng làm đôi, sắp xếp từng nửa, rồi trộn lại. Thời gian chạy thoả mãn hệ thức truy hồi:</p>
+<div style="text-align:center;font:italic 400 20px 'Literata',serif;padding:6px 0">T(n) = 2T(n/2) + O(n) &nbsp;⟹&nbsp; T(n) = O(n log n)</div>
+<div style="font:400 13.5px/1.65 'JetBrains Mono',monospace;background:#f1ece2;border-radius:8px;padding:14px 18px;color:#2a2722"><span style="color:#b2552f">def</span> merge_sort(a):<br>    <span style="color:#b2552f">if</span> len(a) &lt;= 1: <span style="color:#b2552f">return</span> a<br>    m = len(a) // 2<br>    <span style="color:#b2552f">return</span> merge(merge_sort(a[:m]), merge_sort(a[m:]))</div>
+<p style="margin:0">So với <a href="#1e" style="text-decoration:none;border-bottom:1px solid #e3c2b0">[[quick-sort]]</a>, merge sort ổn định và luôn đạt O(n log n), đổi lại tốn thêm O(n) bộ nhớ.</p>
+</article>
+<div style="position:absolute;top:58px;right:24px;display:flex;align-items:center;gap:7px;font-size:11.5px;color:#5d584e;background:#fff;border:1px solid #e4dfd5;border-radius:6px;padding:5px 10px"><span style="width:6px;height:6px;border-radius:50%;background:#5a9a62"></span>Đã cập nhật từ Obsidian</div>
+</main>
+</div></div>
+
+</div>
+<p class="dv-next">Thử tiếp: "thêm dark mode cho <a class="dv-oid" href="#1c">1c</a>" · "quiz nhiều câu dạng stepper" · "biến <a class="dv-oid" href="#1c">1c</a> thành prototype bấm được"</p>
+</section>
+</x-dc>
+</body>
+</html>
