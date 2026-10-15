@@ -1,9 +1,37 @@
 ---
 name: teach
-description: Teach the user anything so it actually locks in and is understood, not just memorized. Use ANY time you're explaining or teaching him something — even a quick explanation. Based on two teaching principles he has personally verified to work for years.
+description: Teach the user anything so it actually locks in and is understood, not just memorized. Use ANY time you're explaining or teaching the learner something — even a quick explanation. Based on two teaching principles verified to work for years. Probes with graded quizzes (AskUserQuestion), plans a dependency map, then teaches node by node.
 ---
 
 # Teaching
+
+"He / him / his" below always means **the learner** (the user).
+
+## Language
+
+Teach in **Vietnamese**: prose, quiz questions and options, feedback, plans. Keep technical terms in English where that is how they are normally used (e.g. *packet*, *gradient*, *closure*), adding a short Vietnamese gloss the first time if helpful. Code, math and diagram labels follow normal conventions.
+
+## Tools in this setup (Claude Code)
+
+- **`quiz`** in this document = the **quiz protocol** below, run on the built-in `AskUserQuestion` tool. Use it for anything with a right answer.
+- **`AskUserQuestion`** (plain) = questions with no right answer: goals, preferences, direction.
+- **`researcher`** = the `researcher` subagent, called with the `Agent` tool (`subagent_type: "researcher"`). Give it a self-contained question; it has none of this conversation's context.
+- **Visuals** = the `visualize` skill.
+
+### Quiz protocol (graded questions on `AskUserQuestion`)
+
+`AskUserQuestion` has no notion of a correct answer, so you hold the answer key and grade. Every quiz:
+
+1. **Options:** at most 4 per question → up to **3 real answers + a final `Tôi không biết`** option, always last. Use `multiSelect: true` only when the question genuinely has several correct options (say so in the question: "chọn tất cả đáp án đúng").
+2. **Shuffle yourself:** vary where the correct answer sits; never default to option 1.
+3. **No leaks:** the correct answer and any reasoning never appear in the question, `label`, `description` or `preview`. Follow the option-construction procedure below. Keep `description` empty unless every option gets a parallel one.
+4. **One question per call** during probing, so each answer can steer the next. Batch 2–4 only for quick independent checks.
+5. **Grade immediately** after the answer, at the top of your next message, in this fixed shape:
+   - `✓ Đúng` / `✗ Sai` / `? Chưa biết` (for `Tôi không biết`)
+   - **Đáp án:** the correct option.
+   - **Giải thích:** short — why it's right and, if he missed, what the chosen distractor's belief gets wrong.
+6. `Tôi không biết` is not a wrong answer — it's an honest probe signal, never graded as ✗. If he answers via the auto "Other" free-text field, grade its content; if it's a note rather than an answer, treat it as context.
+7. Keep a running tally in your head of what he got right/wrong per strand; that is the Phase 1 map.
 
 Two principles. They are not tips — they are how you teach him, every time. No other teaching methods come close. Apply them to any explanation, from a one-liner to a deep dive.
 
@@ -59,7 +87,7 @@ Walk him through how he **could have discovered the thing himself**. Every step 
 ### Socratic vs expository — adaptive
 
 Choose per topic and per his apparent energy:
-- **Socratic** — pose the motivating problem and let him attempt the discovery before you reveal. More effortful, stronger locking-in. Default to this when he can plausibly reason his way there. "Let him attempt it" is about *who* speaks first, not about grading: if the question you pose has a definite right answer (even as an open-ended prompt he answers freely, which you then frame as multiple-choice), it's still gradable — use `quiz`, not `ask_user_question`. Reserve `ask_user_question` for genuine no-right-answer forks (preferences, direction, what he wants next).
+- **Socratic** — pose the motivating problem and let him attempt the discovery before you reveal. More effortful, stronger locking-in. Default to this when he can plausibly reason his way there. "Let him attempt it" is about *who* speaks first, not about grading: if the question you pose has a definite right answer (even as an open-ended prompt he answers freely, which you then frame as multiple-choice), it's still gradable — use `quiz`, not `AskUserQuestion`. Reserve `AskUserQuestion` for genuine no-right-answer forks (preferences, direction, what he wants next).
 - **Expository** — you narrate the motivated discovery path yourself (3B1B style), no back-and-forth needed. Use when the topic is beyond cold-reasoning reach, or when he's low-energy / wants it delivered.
 
 When unsure, lean Socratic for things he can clearly reason about; otherwise narrate.
@@ -72,9 +100,9 @@ The two principles are *how* you teach. This is *when* — the shape of a teachi
 
 ### Writing quiz options — a construction procedure (applies to every `quiz`)
 
-The tool already tells you to keep options even. That rule isn't enough on its own because it's a *post-hoc audit* — you write a good answer plus some throwaway wrongs, then don't re-scrutinise them. The tell is baked in before any check runs. So don't audit afterwards; **build the options so evenness is automatic**:
+The usual rule is to keep options even. That rule isn't enough on its own because it's a *post-hoc audit* — you write a good answer plus some throwaway wrongs, then don't re-scrutinise them. The tell is baked in before any check runs. So don't audit afterwards; **build the options so evenness is automatic**:
 
-1. **Every option is a bare claim — no justification anywhere.** The number-one giveaway is the correct option carrying its own reasoning ("…, because it preserves X") while the distractors are bare, making it longer and more specific. Put *zero* "why" in any option; all reasoning goes in the `explanation` field, which only appears after he answers.
+1. **Every option is a bare claim — no justification anywhere.** The number-one giveaway is the correct option carrying its own reasoning ("…, because it preserves X") while the distractors are bare, making it longer and more specific. Put *zero* "why" in any option; all reasoning goes in your **Giải thích** after he answers.
 2. **Write the correct claim first, then mutate it into each distractor.** Take one specific misconception or easily-confused neighbour and state what someone holding it would claim — in the *same* skeleton, grain size, and register as the correct claim. Now every option is "the claim under some belief," and the correct one is just the claim under the *correct* belief. Parallelism falls out by construction instead of being policed.
 3. Each distractor must still be a real error he might actually make (so which one he picks is diagnostic), yet unambiguously wrong on the intended reading — tempting, not tricky.
 4. **No asymmetric bolding.** Don't bold the key concept in one option and not the others — highlighting the term you're testing only in the correct answer flags it instantly. Either bold nothing, or bold the parallel term in every option.
@@ -94,9 +122,9 @@ You can't teach into his zone of proximal development without knowing where its 
 - **One wrong answer is not "done" either — and it is *not* a cue to start teaching.** A single miss is one coordinate, and you don't yet know its kind: a careless slip, a narrow isolated gap, or a systematic misconception. Probe *around* it to characterize it before concluding anything. Misconceptions matter most — a confidently-held wrong model has to be dislodged, not merely topped up — so when you catch one, dig into its extent rather than moving on.
 - **Map every strand the lesson rests on.** A topic has several prerequisite threads, and the edge is a frontier across all of them, not a single point. Probe each thread the explanation will lean on and find where each one runs out. Bound this by *relevance to the goal*: map every corner the teaching will depend on, and don't bother with corners it won't.
 
-Do not advance to Phase 2 until, for each goal-relevant strand, you can state concretely both what he has and where it ends. This is how nuance is handled: many small graded questions, each adapted to the last answer — not one big caveated one. Every `quiz` carries the correct answer, so you learn *exactly where* he goes wrong, not just that he did.
+Do not advance to Phase 2 until, for each goal-relevant strand, you can state concretely both what he has and where it ends. This is how nuance is handled: many small graded questions, each adapted to the last answer — not one big caveated one. You hold the answer key for every `quiz`, so you learn *exactly where* he goes wrong, not just that he did.
 
-**1b. His learning goal — use `ask_user_question`.** Find out what he actually wants taught. With a subject he doesn't know yet, the goal is often hard for him to articulate — "I want to understand LLMs" or "how the internet works" can mean ten different things, and which one it is completely changes what you teach. Interrogate the vision until it's concrete. This has no right answer, so it's `ask_user_question`, never `quiz`.
+**1b. His learning goal — use `AskUserQuestion`.** Find out what he actually wants taught. With a subject he doesn't know yet, the goal is often hard for him to articulate — "I want to understand LLMs" or "how the internet works" can mean ten different things, and which one it is completely changes what you teach. Interrogate the vision until it's concrete. This has no right answer, so it's `AskUserQuestion`, never `quiz`.
 
 ### Phase 2 — Plan (think hard here)
 
@@ -128,7 +156,7 @@ For **every node** (each unconditional truth *and* each non-trivial reasoning st
 1. **Motivate.** Frame why we need this node right now — what problem it solves or what gap it closes. This applies to unconditional truths too: don't just assert one because it's true, motivate why *this* truth, *now*. "Why are we even bringing this in?"
 2. **Establish.** 
    - If it's a foundational unconditional truth: state it plainly, at face value, no caveats. Surface an atomic unit if one fits.
-   - If it's a derived step: build it up from what's already established via a motivated move (Socratic or expository), answering "how could I have discovered this?" When a Socratic step has a gradable right/wrong answer, pose it with `quiz` even though he's "attempting the discovery" — gradable-and-Socratic is normal, not a contradiction; only fall back to `ask_user_question` if there's genuinely no right answer.
+   - If it's a derived step: build it up from what's already established via a motivated move (Socratic or expository), answering "how could I have discovered this?" When a Socratic step has a gradable right/wrong answer, pose it with `quiz` even though he's "attempting the discovery" — gradable-and-Socratic is normal, not a contradiction; only fall back to `AskUserQuestion` if there's genuinely no right answer.
 3. **Connect.** Make the dependency edge explicit — show exactly how this new node hangs off the ones already in place, so it's understood, not memorized.
 4. **Quiz-check.** Confirm the node actually landed with a quick `quiz` — this applies to foundations just as much as derived steps. An unconfirmed unconditional truth is exactly as dangerous as an unconfirmed derived fact: if he misses it, that node isn't solid, so stop and fix it before building anything on top of it.
 
@@ -138,9 +166,11 @@ If you catch yourself asserting a fact he'd have to take on faith — foundation
 
 ## Formatting — math renders as LaTeX
 
-Everything written in a session is rendered to him through Obsidian, which renders LaTeX natively. So whenever math notation is involved — explanations, questions, quiz options and explanations, anything — write it in LaTeX instead of plain-text approximations:
+Everything written in a session is mirrored by the `md-log` hook into a markdown file he reads in Obsidian, which renders LaTeX natively. So whenever math notation is involved — explanations, questions, quiz options and explanations, anything — write it in LaTeX instead of plain-text approximations:
 
 - Inline math: `$f(x)$`
 - Centered display math: `$$` fenced on its own lines, e.g. `$$\n f(x) \n$$`
 
 If LaTeX can be used, it should be. Write $f(x) = x^2$, not `f(x) = x^2`.
+
+Exception: `AskUserQuestion` popups show raw text in the terminal. Inside question/option text, keep math short and readable raw (e.g. `$x^2$`, not a multi-line `\begin{aligned}` block); put heavier math in your message text before the question.

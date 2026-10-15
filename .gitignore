@@ -16,3 +16,10 @@ __pycache__/
 # Runtime state
 .memory/
 *.log
+.claude/state/
+.claude/settings.local.json
+
+# Learning output (personal)
+notes/
+viz/
+.obsidian/
