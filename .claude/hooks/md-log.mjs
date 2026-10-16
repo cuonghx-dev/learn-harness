@@ -27,6 +27,9 @@
  *   flush         — hook PostToolUse(AskUserQuestion): append new transcript content
  *   flush-later   — hook Stop: detached flush once the transcript stops growing
  *
+ * Only the session that ran `link` (and sessions it continues into via /clear)
+ * is logged; other sessions open in the same project are left alone.
+ *
  * Hooks read their JSON input from stdin and never fail the session: any error
  * is swallowed so a logging problem can't block Claude.
  */
@@ -49,9 +52,10 @@ const SKIP_COMMANDS = new Set(["/clear", "/compact", "/resume", "/model", "/conf
 
 // --- State ---
 //
-// One linked file, but a read cursor per transcript: several sessions can run
-// in the same project, and switching between them must not re-read a
-// transcript from the start.
+// One linked file, written by the transcripts in `linked` only. `transcript` is
+// the session that last submitted a prompt — what `link`/`unlink` act on, since
+// they run outside a hook and get no transcript path of their own. Each linked
+// transcript has its own read cursor so switching never re-reads from the start.
 
 function loadState() {
 	let state
@@ -60,7 +64,12 @@ function loadState() {
 	} catch {
 		state = {}
 	}
-	return { file: state.file ?? null, transcript: state.transcript ?? null, cursors: state.cursors ?? {} }
+	return {
+		file: state.file ?? null,
+		transcript: state.transcript ?? null,
+		linked: state.linked ?? [],
+		cursors: state.cursors ?? {},
+	}
 }
 
 function saveState(state) {
@@ -73,9 +82,8 @@ function saveState(state) {
 	writeFileSync(STATE_FILE, JSON.stringify(state, null, 2) + "\n")
 }
 
-/** The read cursor of the current transcript (created on first use, moved to most-recent). */
-function cursor(state) {
-	const key = state.transcript
+/** The read cursor of `key` (created on first use, moved to most-recent). */
+function cursor(state, key) {
 	const c = state.cursors[key] ?? { offset: 0, asked: [] }
 	c.asked ??= []
 	delete state.cursors[key]
@@ -334,10 +342,12 @@ async function waitForQuiet(transcript, quietMs = 1000, timeoutMs = 10000) {
 	}
 }
 
-function flush(state) {
-	if (!state.file || !state.transcript) return 0
-	const c = cursor(state)
-	const { entries, offset } = readNewEntries(state.transcript, c.offset ?? 0)
+const isLinked = (state, transcript) => Boolean(state.file && transcript && state.linked.includes(transcript))
+
+function flush(state, transcript) {
+	if (!isLinked(state, transcript)) return 0
+	const c = cursor(state, transcript)
+	const { entries, offset } = readNewEntries(transcript, c.offset ?? 0)
 	c.offset = offset
 	const blocks = entriesToBlocks(entries, c.asked)
 	if (blocks.length) appendToFile(state.file, blocks.join("\n\n"))
@@ -358,9 +368,10 @@ function link(arg, state) {
 	if (!existsSync(resolved)) writeFileSync(resolved, "")
 
 	state.file = resolved
+	state.linked = [state.transcript]
 	// Cursors of other transcripts point into the previous file; start over.
 	state.cursors = {}
-	const written = flush(state)
+	const written = flush(state, state.transcript)
 	return `Linked: ${relative(PROJECT_DIR, resolved) || resolved} (${written} blocks backfilled)`
 }
 
@@ -370,9 +381,9 @@ async function main() {
 	// Stop: hand off to a detached process so the session isn't held up while
 	// we wait for the final assistant message to land in the transcript.
 	if (sub === "flush-later") {
-		readStdin()
-		if (!loadState().file) return
-		spawn(process.execPath, [fileURLToPath(import.meta.url), "flush-settled"], {
+		const input = readStdin()
+		if (!isLinked(loadState(), input.transcript_path)) return
+		spawn(process.execPath, [fileURLToPath(import.meta.url), "flush-settled", input.transcript_path], {
 			detached: true,
 			stdio: "ignore",
 			env: { ...process.env, CLAUDE_PROJECT_DIR: PROJECT_DIR },
@@ -381,16 +392,18 @@ async function main() {
 	}
 	// Waits happen before taking the lock so other hooks aren't held up.
 	const input = ["session", "pre-ask", "flush"].includes(sub) ? readStdin() : {}
+	// Hooks act on their own session's transcript, never on whichever session
+	// happened to submit the last prompt.
+	const transcript = sub === "flush-settled" ? rest[0] : input.transcript_path
 	if (sub === "flush-settled") {
-		const { file, transcript } = loadState()
-		if (!file || !transcript) return
+		if (!isLinked(loadState(), transcript)) return
 		await waitForQuiet(transcript)
 	}
 	if (sub === "pre-ask") {
-		const { file, transcript, cursors } = loadState()
-		if (!file) return
+		const state = loadState()
+		if (!isLinked(state, transcript)) return
 		// Flush the prose that leads up to the question first, so it stays above it.
-		if (input.tool_use_id && transcript) await waitForText(transcript, input.tool_use_id, cursors[transcript]?.offset ?? 0)
+		if (input.tool_use_id) await waitForText(transcript, input.tool_use_id, state.cursors[transcript]?.offset ?? 0)
 	}
 
 	switch (sub) {
@@ -401,22 +414,28 @@ async function main() {
 			console.log(
 				await withState((state) => {
 					const name = state.file ? relative(PROJECT_DIR, state.file) : null
-					flush(state)
+					for (const t of state.linked) flush(state, t)
 					state.file = null
+					state.linked = []
 					return name ? `Unlinked: ${name}` : "No file linked"
 				}),
 			)
 			break
 		case "session":
-			// Keep the link across sessions; each transcript has its own cursor,
-			// so a new one is logged from its start and a known one resumes.
-			if (input.transcript_path) await withState((state) => void (state.transcript = input.transcript_path))
+			if (input.transcript_path)
+				await withState((state) => {
+					// /clear starts a new transcript in the same session: keep logging it
+					// if the one it replaces was linked (logged from its start).
+					if (input.source === "clear" && isLinked(state, state.transcript) && !state.linked.includes(input.transcript_path))
+						state.linked.push(input.transcript_path)
+					state.transcript = input.transcript_path
+				})
 			break
 		case "pre-ask":
 			await withState((state) => {
-				if (!state.file) return
-				flush(state)
-				const asked = state.transcript ? cursor(state).asked : []
+				if (!isLinked(state, transcript)) return
+				flush(state, transcript)
+				const asked = cursor(state, transcript).asked
 				const id = input.tool_use_id
 				if (!id || !asked.includes(id)) {
 					appendToFile(state.file, questionBlocks(input.tool_input).join("\n\n"))
@@ -426,7 +445,7 @@ async function main() {
 			break
 		case "flush":
 		case "flush-settled":
-			await withState(flush)
+			await withState((state) => flush(state, transcript))
 			break
 		default:
 			console.error("Usage: md-log.mjs <link <file>|unlink|session|pre-ask|flush>")
