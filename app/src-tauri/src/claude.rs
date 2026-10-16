@@ -16,6 +16,12 @@
 //! with a `grade_quiz` tool: Claude reports quiz grading through it as
 //! structured input, which the UI renders as a graded quiz card.
 //!
+//! "Bỏ qua cấp quyền" runs the session in `bypassPermissions` (what
+//! `--dangerously-skip-permissions` does). Every session is started with
+//! `--allow-dangerously-skip-permissions`, so the toggle switches the running
+//! session's mode via `set_permission_mode` instead of restarting it. Quizzes
+//! still reach us in that mode: `AskUserQuestion` always asks.
+//!
 //! One session at a time. Each spawn gets a generation number so events from a
 //! process that was just replaced can be told apart by the UI.
 
@@ -23,7 +29,7 @@ use std::collections::HashSet;
 use std::io::Read;
 use std::path::Path;
 use std::process::Stdio;
-use std::sync::atomic::{AtomicU64, Ordering};
+use std::sync::atomic::{AtomicBool, AtomicU64, Ordering};
 use std::sync::Arc;
 use std::time::{Duration, Instant};
 
@@ -68,6 +74,15 @@ impl Proc {
 pub struct Claude {
     proc: Mutex<Option<Proc>>,
     next_gen: AtomicU64,
+    skip_permissions: AtomicBool,
+}
+
+fn permission_mode(skip: bool) -> &'static str {
+    if skip {
+        "bypassPermissions"
+    } else {
+        "default"
+    }
 }
 
 async fn write_line(stdin: &Mutex<ChildStdin>, msg: &Value) -> Result<(), String> {
@@ -102,8 +117,9 @@ impl Claude {
             "--include-partial-messages",
             "--permission-prompt-tool",
             "stdio",
+            "--allow-dangerously-skip-permissions",
             "--permission-mode",
-            "default",
+            permission_mode(self.skip_permissions.load(Ordering::SeqCst)),
             "--append-system-prompt",
             SYSTEM_PROMPT,
         ]);
@@ -319,6 +335,22 @@ pub async fn claude_interrupt(claude: State<'_, Claude>) -> Result<(), String> {
     });
     let (stdin, _) = claude.current().await?;
     write_line(&stdin, &msg).await
+}
+
+/// Turn "skip permissions" on or off, for the running session and later ones.
+#[tauri::command]
+pub async fn claude_set_skip_permissions(claude: State<'_, Claude>, skip: bool) -> Result<(), String> {
+    let slot = claude.proc.lock().await;
+    if claude.skip_permissions.swap(skip, Ordering::SeqCst) == skip {
+        return Ok(());
+    }
+    let Some(p) = slot.as_ref() else { return Ok(()) };
+    let msg = json!({
+        "type": "control_request",
+        "request_id": uuid::Uuid::new_v4().to_string(),
+        "request": { "subtype": "set_permission_mode", "mode": permission_mode(skip) },
+    });
+    write_line(&p.stdin, &msg).await
 }
 
 #[tauri::command]

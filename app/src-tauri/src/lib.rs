@@ -36,6 +36,7 @@ pub fn run() {
             claude::claude_send,
             claude::claude_respond,
             claude::claude_interrupt,
+            claude::claude_set_skip_permissions,
             claude::claude_stop,
             files::project_dir,
             files::list_notes,

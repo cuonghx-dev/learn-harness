@@ -22,6 +22,7 @@ export const api = {
   claudeRespond: (requestId: string, response: unknown, alwaysAllow?: string) =>
     invoke<void>("claude_respond", { requestId, response, alwaysAllow: alwaysAllow ?? null }),
   claudeInterrupt: () => invoke<void>("claude_interrupt"),
+  claudeSetSkipPermissions: (skip: boolean) => invoke<void>("claude_set_skip_permissions", { skip }),
   claudeStop: () => invoke<void>("claude_stop"),
 }
 

@@ -1,9 +1,10 @@
-import { useCallback, useEffect, useReducer, useRef } from "react"
+import { useCallback, useEffect, useReducer, useRef, useState } from "react"
 
 import { chatReducer, initialChat, type ChatItem, type QuizPick } from "@/lib/chat"
 import { api, on } from "@/lib/ipc"
 
 const LAST_SESSION_KEY = "learn:lastSession"
+const SKIP_PERMISSIONS_KEY = "learn:skipPermissions"
 
 type Quiz = Extract<ChatItem, { kind: "quiz" }>
 type Permission = Extract<ChatItem, { kind: "permission" }>
@@ -24,6 +25,14 @@ function readLastSession(): LastSession | null {
   }
 }
 
+function readSkipPermissions(): boolean {
+  try {
+    return localStorage.getItem(SKIP_PERMISSIONS_KEY) === "1"
+  } catch {
+    return false
+  }
+}
+
 /** `logFile`: the note md-log writes to, used to name the session for resuming. */
 export function useClaude(logFile?: string | null) {
   const [state, dispatch] = useReducer(chatReducer, initialChat)
@@ -35,6 +44,7 @@ export function useClaude(logFile?: string | null) {
   const stderr = useRef<string[]>([])
   const busy = useRef(false)
   busy.current = state.busy
+  const [skipPermissions, setSkipPermissionsState] = useState(readSkipPermissions)
 
   useEffect(() => {
     const accept = (g: number) => {
@@ -122,5 +132,20 @@ export function useClaude(logFile?: string | null) {
 
   const notice = useCallback((text: string, tone?: "info" | "error") => dispatch({ type: "notice", text, tone }), [])
 
-  return { state, send, answer, skip, decide, interrupt, newSession, notice, lastSession: readLastSession }
+  // Applies to the running session too; the backend switches its permission mode.
+  useEffect(() => {
+    api.claudeSetSkipPermissions(skipPermissions).catch((e) => dispatch({ type: "notice", text: String(e), tone: "error" }))
+    try {
+      localStorage.setItem(SKIP_PERMISSIONS_KEY, skipPermissions ? "1" : "0")
+    } catch {
+      // Storage unavailable: the choice lasts until the app quits.
+    }
+  }, [skipPermissions])
+
+  const setSkipPermissions = useCallback((skip: boolean) => {
+    setSkipPermissionsState(skip)
+    dispatch({ type: "notice", text: skip ? "Đã bật bỏ qua cấp quyền: Claude chạy công cụ không cần hỏi." : "Đã tắt bỏ qua cấp quyền." })
+  }, [])
+
+  return { state, send, answer, skip, decide, interrupt, newSession, notice, lastSession: readLastSession, skipPermissions, setSkipPermissions }
 }

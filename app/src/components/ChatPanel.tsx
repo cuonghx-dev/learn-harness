@@ -1,5 +1,5 @@
 import { useEffect, useLayoutEffect, useRef, useState, type ReactNode } from "react"
-import { ArrowRight, ArrowUp, Check, ChevronDown, Plus, RotateCcw, X } from "lucide-react"
+import { ArrowRight, ArrowUp, Check, ChevronDown, Plus, RotateCcw, ShieldOff, X } from "lucide-react"
 
 import { Markdown } from "@/components/Markdown"
 import { PermissionCard } from "@/components/PermissionCard"
@@ -29,7 +29,7 @@ function rows(items: ChatItem[]): Row[] {
 }
 
 export function ChatPanel({ claude, logControl }: { claude: Claude; logControl: ReactNode }) {
-  const { state, send, answer, skip, decide, interrupt, newSession, lastSession } = claude
+  const { state, send, answer, skip, decide, interrupt, newSession, lastSession, skipPermissions, setSkipPermissions } = claude
   const [draft, setDraft] = useState("")
   const scroller = useRef<HTMLDivElement>(null)
   const stick = useRef(true)
@@ -81,6 +81,18 @@ export function ChatPanel({ claude, logControl }: { claude: Claude; logControl: 
         </span>
         <div className="ml-auto flex min-w-0 items-center gap-2">
           {logControl}
+          <button
+            title={skipPermissions ? "Đang bỏ qua cấp quyền (--dangerously-skip-permissions). Bấm để tắt" : "Bỏ qua cấp quyền (--dangerously-skip-permissions)"}
+            aria-label="Bỏ qua cấp quyền"
+            aria-pressed={skipPermissions}
+            onClick={() => setSkipPermissions(!skipPermissions)}
+            className={cn(
+              "flex size-7 shrink-0 items-center justify-center rounded-[7px]",
+              skipPermissions ? "bg-bad/10 text-bad hover:bg-bad/15" : "text-muted-1 hover:bg-tint",
+            )}
+          >
+            <ShieldOff className="size-4" />
+          </button>
           <button
             title="Session mới"
             aria-label="Session mới"
@@ -190,6 +202,7 @@ export function ChatPanel({ claude, logControl }: { claude: Claude; logControl: 
           />
           <div className="mt-1 flex items-center gap-2">
             <span className="min-w-0 truncate font-mono text-[11px] text-placeholder">{state.model ?? "claude"}</span>
+            {skipPermissions && <span className="shrink-0 text-[11px] font-medium text-bad">bỏ qua cấp quyền</span>}
             <span className="ml-auto truncate text-[11px] text-[#a9a397]">Enter gửi · ⇧Enter xuống dòng</span>
             {state.busy ? (
               <button
